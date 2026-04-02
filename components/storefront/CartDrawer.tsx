@@ -10,6 +10,8 @@ type CheckoutResponse = {
   ok: boolean;
   error?: string;
   details?: string;
+  message?: string;
+  retryable?: boolean;
   order?: {
     id: string;
     orderNumber: string;
@@ -250,18 +252,28 @@ export default function CartDrawer() {
       const data = (await response.json()) as CheckoutResponse;
 
       if (!response.ok || !data.ok) {
+        if (response.status >= 500) {
+          throw new Error(data.error ?? "SERVER_ERROR");
+        }
+
         replaceCart(cartSnapshot);
         setCheckoutResult(null);
         setIsBackgroundSyncing(false);
 
         if (data.error === "INSUFFICIENT_STOCK") {
           setErrorMessage(`لا يوجد مخزون كافٍ للمنتج: ${data.details ?? "غير معروف"}`);
+        } else if (data.error === "PRODUCT_NOT_FOUND") {
+          setErrorMessage("أحد المنتجات لم يعد متاحاً حالياً. حدّث الصفحة وأعد المحاولة.");
         } else if (data.error === "INSUFFICIENT_RECEIVED") {
           setErrorMessage("المبلغ المستلم غير كافٍ لإتمام الدفع النقدي.");
+        } else if (data.error === "TRANSACTION_CONFLICT") {
+          setErrorMessage("يوجد ضغط على النظام الآن. حاول مرة أخرى خلال ثوانٍ.");
+        } else if (data.error === "TOO_MANY_REQUESTS") {
+          setErrorMessage("تم تجاوز عدد المحاولات المسموح. انتظر قليلاً ثم أعد المحاولة.");
         } else if (data.error === "INVALID_CODE" || data.error === "CODE_EXPIRED" || data.error === "CODE_INACTIVE") {
           setErrorMessage("كود الخصم غير صالح أو منتهي.");
         } else {
-          setErrorMessage("فشل إتمام العملية. حاول مرة أخرى.");
+          setErrorMessage(data.message ? `تعذر إتمام الطلب: ${data.message}` : "فشل إتمام العملية. حاول مرة أخرى.");
         }
         return;
       }
