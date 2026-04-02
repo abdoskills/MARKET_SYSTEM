@@ -2,9 +2,51 @@ import Link from "next/link";
 import { getServerSession } from "@/lib/auth/server";
 import { prisma } from "@/lib/prisma";
 import { formatEgp } from "@/lib/format/locale";
+import { revalidatePath } from "next/cache";
 
 export default async function OrdersPage() {
   const session = await getServerSession();
+
+  const walletProfile = session
+    ? await prisma.user.findUnique({
+        where: { id: session.userId },
+        select: { phone: true },
+      })
+    : null;
+
+  async function cancelOrderAction(formData: FormData) {
+    "use server";
+
+    const orderId = String(formData.get("orderId") ?? "").trim();
+    if (!orderId) return;
+
+    const activeSession = await getServerSession();
+    if (!activeSession) return;
+
+    const activeUser = await prisma.user.findUnique({
+      where: { id: activeSession.userId },
+      select: { phone: true },
+    });
+
+    await prisma.order.updateMany({
+      where: {
+        id: orderId,
+        status: { in: ["PENDING", "IN_PROGRESS"] },
+        OR: [
+          { createdByUserId: activeSession.userId },
+          ...(activeUser?.phone
+            ? [{ customer: { phone: { equals: activeUser.phone } } }]
+            : []),
+        ],
+      },
+      data: {
+        status: "CANCELED",
+        canceledAt: new Date(),
+      },
+    });
+
+    revalidatePath("/orders");
+  }
 
   if (!session) {
     return (
@@ -30,7 +72,14 @@ export default async function OrdersPage() {
   }
 
   const orders = await prisma.order.findMany({
-    where: { customerId: session.userId },
+    where: {
+      OR: [
+        { createdByUserId: session.userId },
+        ...(walletProfile?.phone
+          ? [{ customer: { phone: { equals: walletProfile.phone } } }]
+          : []),
+      ],
+    },
     orderBy: { createdAt: 'desc' },
     take: 20,
     include: {
@@ -47,10 +96,9 @@ export default async function OrdersPage() {
   const getStatusDisplay = (status: string) => {
     switch (status) {
       case "PENDING": return { label: "قيد المراجعة", color: "bg-[#fed65b]/20 text-[#735c00]" };
-      case "PROCESSING": return { label: "جاري التجهيز", color: "bg-[#b0f0d6]/30 text-[#003527]" };
-      case "SHIPPED": return { label: "جاري التوصيل", color: "bg-[#003527] text-white" };
-      case "DELIVERED": return { label: "تم التوصيل", color: "bg-[#064e3b]/10 text-[#064e3b]" };
-      case "CANCELLED": return { label: "ملغي", color: "bg-[#ba1a1a]/10 text-[#ba1a1a]" };
+      case "IN_PROGRESS": return { label: "جاري التجهيز", color: "bg-[#b0f0d6]/30 text-[#003527]" };
+      case "COMPLETED": return { label: "تم التوصيل", color: "bg-[#064e3b]/10 text-[#064e3b]" };
+      case "CANCELED": return { label: "ملغي", color: "bg-[#ba1a1a]/10 text-[#ba1a1a]" };
       default: return { label: status, color: "bg-gray-100 text-gray-700" };
     }
   };
@@ -91,6 +139,7 @@ export default async function OrdersPage() {
           <div className="space-y-4">
             {orders.map((order) => {
               const statusInfo = getStatusDisplay(order.status);
+              const canCancel = order.status === "PENDING" || order.status === "IN_PROGRESS";
               
               return (
                 <div key={order.id} className="rounded-lg bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md border-r-4 border-[#003527]">
@@ -122,6 +171,18 @@ export default async function OrdersPage() {
                     <span className="text-sm font-bold text-[#404944]">الإجمالي</span>
                     <span className="font-serif text-lg font-bold text-[#003527]">{formatEgp(Number(order.totalAmount))}</span>
                   </div>
+
+                  {canCancel && (
+                    <form action={cancelOrderAction} className="mt-3">
+                      <input type="hidden" name="orderId" value={order.id} />
+                      <button
+                        type="submit"
+                        className="w-full rounded-lg border border-[#ba1a1a]/30 bg-[#ba1a1a]/5 py-2 text-sm font-bold text-[#ba1a1a] transition hover:bg-[#ba1a1a]/10"
+                      >
+                        إلغاء الطلب
+                      </button>
+                    </form>
+                  )}
                 </div>
               );
             })}
