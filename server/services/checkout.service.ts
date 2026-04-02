@@ -151,7 +151,7 @@ async function buildPrintableHtml(payload: {
     </style>
   </head>
   <body>
-    <h1>Pristine POS</h1>
+    <h1>L'Artisan Laitier</h1>
     <p>رقم الطلب: ${payload.orderNumber}</p>
     <p>رقم الإيصال: ${payload.receiptNumber}</p>
     <p>التاريخ: ${new Date(payload.createdAt).toLocaleString("ar-EG")}</p>

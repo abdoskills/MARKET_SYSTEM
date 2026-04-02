@@ -58,7 +58,7 @@ function renderShell(input: { title: string; subtitle: string; contentHtml: stri
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px; margin:0 auto; background:#f6fbf9; border-radius:32px; padding:32px; border:none;">
       <tr>
         <td style="text-align:center;">
-          <div style="display:inline-block; background:#d8eee4; color:#006c4a; padding:10px 18px; border-radius:999px; font-weight:700; font-size:13px; letter-spacing:.3px;">Pristine POS</div>
+          <div style="display:inline-block; background:#d8eee4; color:#006c4a; padding:10px 18px; border-radius:999px; font-weight:700; font-size:13px; letter-spacing:.3px;">L'Artisan Laitier</div>
           <h1 style="margin:16px 0 8px; font-size:30px; line-height:1.2; color:#006c4a; font-weight:800;">${input.title}</h1>
           <p style="margin:0 0 24px; color:#4b5563; font-size:15px;">${input.subtitle}</p>
         </td>
@@ -95,9 +95,9 @@ export async function sendVerificationEmail(input: VerificationEmailInput) {
   });
 
   await transporter.sendMail({
-    from: `"Pristine POS Security" <${SMTP_USER}>`,
+    from: `"L'Artisan Laitier Security" <${SMTP_USER}>`,
     to: input.to,
-    subject: "Verify your Pristine POS account",
+    subject: "Verify your L'Artisan Laitier account",
     html,
   });
 }
@@ -120,9 +120,9 @@ export async function sendPasswordResetEmail(input: PasswordResetEmailInput) {
   });
 
   await transporter.sendMail({
-    from: `"Pristine POS Security" <${SMTP_USER}>`,
+    from: `"L'Artisan Laitier Security" <${SMTP_USER}>`,
     to: input.to,
-    subject: "Password reset for Pristine POS",
+    subject: "Password reset for L'Artisan Laitier",
     html,
   });
 }
@@ -141,7 +141,7 @@ export async function sendReceipt(input: ReceiptEmailInput) {
   });
 
   await transporter.sendMail({
-    from: `"Pristine POS Receipts" <${SMTP_USER}>`,
+    from: `"L'Artisan Laitier Receipts" <${SMTP_USER}>`,
     to: input.to,
     subject: `إيصال الطلب ${input.order.orderNumber}`,
     html,

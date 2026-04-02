@@ -24,7 +24,7 @@ export default async function StorefrontPage({
       <header className="fixed top-0 w-full z-40 bg-white/80 backdrop-blur-xl shadow-sm">
         <div className="mx-auto w-full max-w-7xl px-4 py-3">
           <div className="flex items-center justify-between gap-3">
-            <Link href="/" className="text-lg md:text-xl font-bold tracking-tight text-emerald-700 whitespace-nowrap">Pristine POS</Link>
+            <Link href="/" className="text-lg md:text-xl font-bold tracking-tight text-emerald-700 whitespace-nowrap">L'Artisan Laitier</Link>
             <div className="flex items-center gap-3">
               <TopActions isAuthenticated={Boolean(session)} role={session?.role} />
             </div>

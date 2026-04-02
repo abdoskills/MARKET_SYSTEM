@@ -36,7 +36,7 @@ export default async function ProductsPage({
               {params.category && <input type="hidden" name="category" value={params.category} />}
             </div>
           </form>
-          <Link href="/" className="text-sm md:text-base font-bold text-[#006c4a]">Pristine POS</Link>
+          <Link href="/" className="text-sm md:text-base font-bold text-[#006c4a]">L'Artisan Laitier</Link>
         </div>
       </header>
 

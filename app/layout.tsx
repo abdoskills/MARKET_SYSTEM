@@ -16,7 +16,7 @@ const beVietnam = Be_Vietnam_Pro({
 });
 
 export const metadata: Metadata = {
-  title: "Pristine POS",
+  title: "L'Artisan Laitier",
   description: "Supermarket & Dairy Management System",
 };
 

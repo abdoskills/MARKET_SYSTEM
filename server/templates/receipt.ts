@@ -56,14 +56,14 @@ export function buildReceiptEmailHtml(input: BuildReceiptTemplateInput) {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>إيصال Pristine POS</title>
+    <title>إيصال L'Artisan Laitier</title>
   </head>
   <body style="margin:0; padding:24px; background:#ecf6f1; font-family:Inter, Arial, sans-serif; color:#0f172a; direction:rtl; text-align:right;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:680px; margin:0 auto; background:#f8fcfa; border-radius:16px;">
       <tr>
         <td style="padding:24px;">
           <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-            <div style="display:inline-block; background:#d8eee4; color:#006c4a; border-radius:999px; padding:8px 14px; font-weight:800;">Pristine POS</div>
+            <div style="display:inline-block; background:#d8eee4; color:#006c4a; border-radius:999px; padding:8px 14px; font-weight:800;">L'Artisan Laitier</div>
             <div style="color:#64748b; font-size:13px;">شكراً لاختياركم بريستين</div>
           </div>
 
