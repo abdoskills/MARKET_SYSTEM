@@ -57,6 +57,21 @@ export default function CartDrawer() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+
+  // Load saved client profile from local storage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedProfile = localStorage.getItem("client_profile");
+      if (savedProfile) {
+        try {
+          const { phone, address } = JSON.parse(savedProfile);
+          if (phone) setPhone(phone);
+          if (address) setAddress(address);
+        } catch {}
+      }
+    }
+  }, []);
+
   const [promoCode, setPromoCode] = useState("");
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoLoading, setPromoLoading] = useState(false);
@@ -204,10 +219,17 @@ export default function CartDrawer() {
       },
     });
 
-    setIsBackgroundSyncing(true);
-    setIsOfflineSaved(false);
+      setIsBackgroundSyncing(true);
+      setIsOfflineSaved(false);
 
-    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem(
+          "client_profile",
+          JSON.stringify({ phone: phone.trim(), address: address.trim() })
+        );
+      }
+
+      try {
       const response = await fetch("/api/pos/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
