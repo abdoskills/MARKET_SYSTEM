@@ -203,7 +203,7 @@ export default function InventoryManager({ role }: { role: SessionRole }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f9fb] p-6" dir="rtl">
+    <div className="min-h-screen bg-[#f7f9fb] p-4 md:p-6" dir="rtl">
       <div className="mx-auto max-w-7xl space-y-6">
         <header className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -211,13 +211,13 @@ export default function InventoryManager({ role }: { role: SessionRole }) {
               <h1 className="text-2xl font-black text-[#191c1e]">إدارة المنتجات والمخزون</h1>
               <p className="text-sm text-slate-500 mt-1">إضافة / تعديل / حذف منتجات مع تنبيه المخزون المنخفض.</p>
             </div>
-            <div className="flex gap-3">
-              <div className="relative">
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+              <div className="relative w-full sm:w-72">
                 <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
                 <input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="rounded-xl border border-slate-200 bg-white py-2 pr-10 pl-3 text-sm outline-none focus:ring-2 focus:ring-[#006c4a]/20 focus:border-[#006c4a]"
+                  className="w-full rounded-xl border border-slate-200 bg-white py-2 pr-10 pl-3 text-sm outline-none focus:ring-2 focus:ring-[#006c4a]/20 focus:border-[#006c4a]"
                   placeholder="بحث بالاسم أو SKU"
                 />
               </div>

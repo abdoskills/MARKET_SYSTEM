@@ -10,7 +10,7 @@ export default function FloatingCartBar() {
   if (count === 0) return null;
 
   return (
-    <div className="fixed bottom-24 left-6 z-50 md:hidden">
+    <div className="fixed bottom-6 left-6 z-50 md:hidden">
       <button 
         onClick={openCart}
         className="bg-gradient-to-r from-[#006c4a] to-[#3fb687] text-white px-6 py-4 rounded-full shadow-[0_20px_40px_rgba(25,28,30,0.06)] flex items-center gap-3 active:scale-90 transition-transform"

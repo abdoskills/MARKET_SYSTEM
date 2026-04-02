@@ -28,7 +28,7 @@ export default function AdminSidebar({ role }: AdminSidebarProps) {
   return (
     <>
       {/* Mobile Toggle Button */}
-      <div className="md:hidden fixed top-4 right-4 z-50">
+      <div className="md:hidden fixed right-4 top-[max(1rem,env(safe-area-inset-top))] z-50">
         <button
           onClick={handleToggle}
           className="min-h-[44px] min-w-[44px] flex items-center justify-center bg-white border border-gray-200 text-[#006c4a] rounded-xl shadow-sm z-50 focus:outline-none focus:ring-2 focus:ring-[#006c4a]"

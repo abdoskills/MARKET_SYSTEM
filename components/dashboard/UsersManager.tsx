@@ -69,7 +69,8 @@ export default function UsersManager({ initialUsers }: { initialUsers: Dashboard
       {error ? <p className="rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p> : null}
 
       <div className="overflow-hidden rounded-3xl bg-surface-container-lowest shadow-ambient">
-        <div className="grid grid-cols-6 bg-surface-container-low px-5 py-3 text-xs font-bold text-secondary">
+        <div className="overflow-x-auto">
+        <div className="grid min-w-[860px] grid-cols-6 bg-surface-container-low px-5 py-3 text-xs font-bold text-secondary">
           <div>الاسم</div>
           <div>الدور</div>
           <div>البريد</div>
@@ -86,7 +87,7 @@ export default function UsersManager({ initialUsers }: { initialUsers: Dashboard
             const allowedRole = user.role === "MANAGER" ? "CASHIER" : user.role;
 
             return (
-              <div key={user.id} className="grid grid-cols-6 items-center px-5 py-4 text-sm text-on-surface even:bg-surface">
+              <div key={user.id} className="grid min-w-[860px] grid-cols-6 items-center px-5 py-4 text-sm text-on-surface even:bg-surface">
                 <div className="font-semibold">{user.fullName}</div>
                 <div>
                   <select
@@ -131,6 +132,7 @@ export default function UsersManager({ initialUsers }: { initialUsers: Dashboard
             );
           })
         )}
+        </div>
       </div>
     </section>
   );

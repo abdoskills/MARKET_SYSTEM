@@ -97,7 +97,7 @@ export default function OrdersManager() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f9fb] p-6" dir="rtl">
+    <div className="min-h-screen bg-[#f7f9fb] p-4 md:p-6" dir="rtl">
       <div className="mx-auto max-w-7xl space-y-5">
         <header className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -105,14 +105,14 @@ export default function OrdersManager() {
               <h1 className="text-2xl font-black text-[#191c1e]">إدارة الطلبات</h1>
               <p className="text-sm text-slate-500 mt-1">تحديث حالة الطلب (جاري - تم - ملغي) + بيانات العميل والعنوان.</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
               <span className="rounded-full bg-[#d5e3fd] px-3 py-1 text-xs font-bold text-[#006c4a]">{activeCount} طلب نشط</span>
-              <div className="relative">
+              <div className="relative w-full sm:w-80">
                 <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
                 <input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="rounded-xl border border-slate-200 bg-white py-2 pr-10 pl-3 text-sm outline-none focus:ring-2 focus:ring-[#006c4a]/20 focus:border-[#006c4a]"
+                  className="w-full rounded-xl border border-slate-200 bg-white py-2 pr-10 pl-3 text-sm outline-none focus:ring-2 focus:ring-[#006c4a]/20 focus:border-[#006c4a]"
                   placeholder="بحث برقم الطلب أو العميل"
                 />
               </div>

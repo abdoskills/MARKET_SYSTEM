@@ -359,9 +359,9 @@ export default function CartDrawer() {
       </div>
 
       {isCheckoutOpen && (
-        <div className="fixed inset-0 z-[70] bg-black/30 p-4 backdrop-blur-sm" onClick={resetCheckoutFlow}>
+        <div className="fixed inset-0 z-[70] overflow-y-auto bg-black/30 p-4 backdrop-blur-sm" onClick={resetCheckoutFlow}>
           <div
-            className="mx-auto mt-10 max-w-2xl rounded-3xl bg-white p-5 md:p-7 shadow-2xl"
+            className="mx-auto my-4 max-h-[calc(100dvh-2rem)] max-w-2xl overflow-y-auto rounded-3xl bg-white p-5 md:my-8 md:p-7 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
             dir="rtl"
           >

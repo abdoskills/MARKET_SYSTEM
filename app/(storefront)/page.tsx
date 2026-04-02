@@ -4,7 +4,6 @@ import ProductCard from "@/components/storefront/ProductCard";
 import TopActions from "@/components/storefront/TopActions";
 import { getStorefrontProducts, listActiveCategories } from "@/server/services/product.service";
 import Link from "next/link";
-import Image from "next/image";
 import { getServerSession } from "@/lib/auth/server";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +19,7 @@ export default async function StorefrontPage({
   const categories = await listActiveCategories();
 
   return (
-    <main className="min-h-screen bg-[#f7f9fb] text-[#191c1e] antialiased mb-24 font-sans" dir="rtl">
+    <main className="min-h-screen bg-[#f7f9fb] text-[#191c1e] antialiased mb-8 font-sans" dir="rtl">
       {/* Top Navigation Bar */}
       <header className="fixed top-0 w-full z-40 bg-white/80 backdrop-blur-xl shadow-sm">
         <div className="flex flex-row-reverse justify-between items-center px-4 py-3 w-full max-w-full">
@@ -119,26 +118,6 @@ export default async function StorefrontPage({
 
       <FloatingCartBar />
       <CartDrawer />
-
-      {/* Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 w-full z-30 bg-white/90 backdrop-blur-md rounded-t-2xl border-t border-slate-100 flex justify-around items-center pt-3 pb-8 px-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] md:hidden">
-        <Link href="/" className="flex flex-col items-center justify-center text-emerald-600">
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>home</span>
-          <span className="text-[10px] font-semibold mt-1">Home</span>
-        </Link>
-        <Link href="/" className="flex flex-col items-center justify-center text-slate-400 opacity-80 active:scale-90 transition-transform">
-          <span className="material-symbols-outlined">grid_view</span>
-          <span className="text-[10px] font-semibold mt-1">Categories</span>
-        </Link>
-        <Link href="/" className="flex flex-col items-center justify-center text-slate-400 opacity-80 active:scale-90 transition-transform">
-          <span className="material-symbols-outlined">shopping_bag</span>
-          <span className="text-[10px] font-semibold mt-1">Orders</span>
-        </Link>
-        <Link href="/" className="flex flex-col items-center justify-center text-slate-400 opacity-80 active:scale-90 transition-transform">
-          <span className="material-symbols-outlined">person</span>
-          <span className="text-[10px] font-semibold mt-1">Account</span>
-        </Link>
-      </nav>
     </main>
   );
 }
