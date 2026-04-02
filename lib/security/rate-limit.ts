@@ -1,28 +1,48 @@
-type Bucket = {
-  count: number;
-  resetAt: number;
-};
+import { prisma } from "@/lib/prisma";
 
-const buckets = new Map<string, Bucket>();
-
-export function checkRateLimit(input: {
+export async function checkRateLimit(input: {
   key: string;
   limit: number;
   windowMs: number;
 }) {
-  const now = Date.now();
-  const existing = buckets.get(input.key);
+  const now = new Date();
+  const nextResetAt = new Date(now.getTime() + input.windowMs);
 
-  if (!existing || existing.resetAt <= now) {
-    buckets.set(input.key, { count: 1, resetAt: now + input.windowMs });
-    return { ok: true, remaining: input.limit - 1, resetAt: now + input.windowMs };
+  const result = await prisma.$transaction(async (tx) => {
+    const existing = await tx.rateLimitBucket.findUnique({ where: { key: input.key } });
+
+    if (!existing || existing.resetAt.getTime() <= now.getTime()) {
+      await tx.rateLimitBucket.upsert({
+        where: { key: input.key },
+        update: { count: 1, resetAt: nextResetAt },
+        create: { key: input.key, count: 1, resetAt: nextResetAt },
+      });
+
+      return { ok: true, remaining: Math.max(0, input.limit - 1), resetAt: nextResetAt.getTime() };
+    }
+
+    if (existing.count >= input.limit) {
+      return { ok: false, remaining: 0, resetAt: existing.resetAt.getTime() };
+    }
+
+    const updated = await tx.rateLimitBucket.update({
+      where: { key: input.key },
+      data: { count: { increment: 1 } },
+      select: { count: true, resetAt: true },
+    });
+
+    return {
+      ok: true,
+      remaining: Math.max(0, input.limit - updated.count),
+      resetAt: updated.resetAt.getTime(),
+    };
+  });
+
+  if (Math.random() < 0.02) {
+    void prisma.rateLimitBucket
+      .deleteMany({ where: { resetAt: { lt: new Date(Date.now() - 24 * 60 * 60 * 1000) } } })
+      .catch(() => undefined);
   }
 
-  if (existing.count >= input.limit) {
-    return { ok: false, remaining: 0, resetAt: existing.resetAt };
-  }
-
-  existing.count += 1;
-  buckets.set(input.key, existing);
-  return { ok: true, remaining: input.limit - existing.count, resetAt: existing.resetAt };
+  return result;
 }

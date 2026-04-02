@@ -15,6 +15,8 @@ export type CheckoutInput = {
   promoCode?: string;
   paymentMethod?: "CASH" | "CARD";
   receivedAmount?: number;
+  addChangeToWallet?: boolean;
+  walletUserId?: string;
   items?: CheckoutItemInput[];
 };
 
@@ -31,6 +33,10 @@ export type CheckoutServiceResult = {
     paidAmount: number;
     changeAmount: number;
     phone: string | null;
+  };
+  walletUpdate?: {
+    addedAmount: number;
+    newBalance: number;
   };
   receipt: {
     id: string;
@@ -188,6 +194,8 @@ export async function executeCheckout(input: CheckoutInput): Promise<CheckoutSer
   const address = (input.address ?? "").trim();
   const promoCode = (input.promoCode ?? "").trim().toUpperCase();
   const receivedAmount = Number(input.receivedAmount ?? 0);
+  const addChangeToWallet = Boolean(input.addChangeToWallet);
+  const walletUserId = input.walletUserId?.trim() || null;
 
   const aggregated = new Map<string, number>();
   for (const row of input.items ?? []) {
@@ -401,6 +409,44 @@ export async function executeCheckout(input: CheckoutInput): Promise<CheckoutSer
       },
     });
 
+    let walletUpdate: CheckoutServiceResult["walletUpdate"];
+    if (addChangeToWallet && walletUserId && changeAmount > 0) {
+      const walletOwner = await tx.user.findUnique({
+        where: { id: walletUserId },
+        select: { walletBalance: true },
+      });
+
+      if (walletOwner) {
+        const currentBalance = Number(walletOwner.walletBalance);
+        const newBalance = toThreeDecimals(currentBalance + changeAmount);
+
+        await tx.user.update({
+          where: { id: walletUserId },
+          data: { walletBalance: newBalance },
+        });
+
+        await tx.walletTransaction.create({
+          data: {
+            userId: walletUserId,
+            type: "FAKKA_ADDED",
+            amount: changeAmount,
+            balanceAfter: newBalance,
+            note: `إضافة فكة من الطلب ${order.orderNumber}`,
+            metadata: {
+              orderId: order.id,
+              orderNumber: order.orderNumber,
+              channel,
+            },
+          },
+        });
+
+        walletUpdate = {
+          addedAmount: changeAmount,
+          newBalance,
+        };
+      }
+    }
+
       return {
         order: {
           id: order.id,
@@ -415,6 +461,7 @@ export async function executeCheckout(input: CheckoutInput): Promise<CheckoutSer
           changeAmount,
           phone: phone || null,
         },
+        walletUpdate,
         receipt: {
           id: receipt.id,
           receiptNumber: receipt.receiptNumber,

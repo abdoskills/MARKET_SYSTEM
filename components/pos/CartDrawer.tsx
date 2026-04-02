@@ -88,7 +88,7 @@ export default function CartDrawer({
                 <span>الإجمالي</span>
                 <span className="text-emerald-base text-2xl">{formatEgp(total)}</span>
               </div>
-              <Link href="/checkout" className="w-full min-h-[54px] bg-emerald-base text-white rounded-2xl font-bold text-lg flex items-center justify-center shadow-lg hover:opacity-90 active:scale-95 transition-all">
+              <Link href="/checkout?mode=pos" className="w-full min-h-[54px] bg-emerald-base text-white rounded-2xl font-bold text-lg flex items-center justify-center shadow-lg hover:opacity-90 active:scale-95 transition-all">
                 إتمام الطلب
               </Link>
             </div>

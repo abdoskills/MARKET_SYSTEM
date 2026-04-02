@@ -28,7 +28,11 @@ export default function RegisterPage() {
         body: JSON.stringify({ fullName, email, phone, password }),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+        needsVerification?: boolean;
+      };
       if (!response.ok || !data.ok) {
         if (data.error === "USER_ALREADY_EXISTS") {
           setError("هذا الحساب موجود بالفعل.");
@@ -37,6 +41,11 @@ export default function RegisterPage() {
         } else {
           setError(data.error || "تعذر إنشاء الحساب.");
         }
+        return;
+      }
+
+      if (data.needsVerification && email.trim()) {
+        router.replace(`/verify?email=${encodeURIComponent(email.trim())}`);
         return;
       }
 

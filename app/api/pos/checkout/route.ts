@@ -2,6 +2,8 @@ import { executeCheckout, type CheckoutInput } from "@/server/services/checkout.
 import { captureError } from "@/lib/monitoring/sentry";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { getServerSession } from "@/lib/auth/server";
+import { prisma } from "@/lib/prisma";
+import { sendReceipt } from "@/server/services/email.service";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
@@ -13,6 +15,7 @@ const CheckoutSchema = z.object({
   promoCode: z.string().trim().max(40).optional(),
   paymentMethod: z.enum(["CASH", "CARD"]).optional(),
   receivedAmount: z.coerce.number().min(0).optional(),
+  addChangeToWallet: z.coerce.boolean().optional(),
   items: z
     .array(
       z.object({
@@ -37,7 +40,7 @@ const CheckoutSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-    const rate = checkRateLimit({ key: `checkout:${ip}`, limit: 60, windowMs: 60_000 });
+    const rate = await checkRateLimit({ key: `checkout:${ip}`, limit: 60, windowMs: 60_000 });
     if (!rate.ok) {
       return NextResponse.json({ ok: false, error: "TOO_MANY_REQUESTS" }, { status: 429 });
     }
@@ -55,7 +58,55 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, error: "UNAUTHENTICATED" }, { status: 401 });
     }
 
-    const result = await executeCheckout(parsed.data as CheckoutInput);
+    const result = await executeCheckout({
+      ...(parsed.data as CheckoutInput),
+      walletUserId: session?.userId,
+    });
+
+    const receiptPayload = result.receipt.payload;
+
+    const receiptUser = session?.userId
+      ? await prisma.user.findUnique({
+          where: { id: session.userId },
+          select: { email: true, fullName: true },
+        })
+      : result.order.phone
+        ? await prisma.user.findFirst({
+            where: { phone: result.order.phone },
+            select: { email: true, fullName: true },
+          })
+        : null;
+
+    if (receiptUser?.email) {
+      void sendReceipt({
+        to: receiptUser.email,
+        fullName: receiptUser.fullName,
+        order: {
+          id: result.order.id,
+          orderNumber: result.order.orderNumber,
+          createdAt: result.order.createdAt,
+          totalAmount: result.order.totalAmount,
+          paymentMethod: result.order.paymentMethod,
+        },
+        items: receiptPayload.items,
+        walletUpdate: result.walletUpdate,
+      }).catch((error) => {
+        captureError(error, { route: "/api/pos/checkout", stage: "send-receipt" });
+      });
+    }
+
+    await prisma.auditLog.create({
+      data: {
+        userId: session?.userId ?? null,
+        action: "CHECKOUT_CREATED",
+        ipAddress: ip,
+        details: {
+          orderNumber: result.order.orderNumber,
+          totalAmount: result.order.totalAmount,
+          channel,
+        },
+      },
+    });
 
     return NextResponse.json({ ok: true, ...result });
   } catch (error) {

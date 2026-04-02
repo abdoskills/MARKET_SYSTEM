@@ -44,6 +44,10 @@ export default function LoginPage() {
           setError("بيانات الدخول غير صحيحة.");
         } else if (data.error === "ACCOUNT_LOCKED") {
           setError("الحساب مقفل مؤقتًا بسبب محاولات كثيرة.");
+        } else if (data.error === "ACCOUNT_NOT_VERIFIED") {
+          setError("الحساب غير مفعل. تحقق من بريدك ثم أدخل كود التفعيل.");
+        } else if (data.error === "ACCOUNT_DISABLED") {
+          setError("الحساب غير نشط. تواصل مع الإدارة.");
         } else {
           setError("تعذر تسجيل الدخول حالياً.");
         }
@@ -127,6 +131,15 @@ export default function LoginPage() {
             )}
           </button>
         </form>
+
+        <div className="mt-4 flex items-center justify-between text-sm">
+          <Link href="/forgot-password" className="font-bold text-[#006c4a]">
+            نسيت كلمة المرور؟
+          </Link>
+          <Link href="/verify" className="font-bold text-[#006c4a]">
+            تفعيل الحساب
+          </Link>
+        </div>
 
         <Link href="/register" className="mt-4 block text-center text-sm font-bold text-[#006c4a]">
           إنشاء حساب جديد

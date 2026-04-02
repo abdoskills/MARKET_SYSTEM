@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-    const rate = checkRateLimit({ key: `login:${ip}`, limit: 10, windowMs: 60_000 });
+    const rate = await checkRateLimit({ key: `login:${ip}`, limit: 10, windowMs: 60_000 });
     if (!rate.ok) {
       return NextResponse.json({ ok: false, error: "TOO_MANY_REQUESTS" }, { status: 429 });
     }
@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findFirst({
       where: {
-        isActive: true,
         OR: [
           { email: { equals: identifier, mode: "insensitive" } },
           { phone: { equals: identifier } },
@@ -40,6 +39,8 @@ export async function POST(request: NextRequest) {
       select: {
         id: true,
         role: true,
+        isActive: true,
+        emailVerified: true,
         passwordHash: true,
         loginAttempts: true,
         lockUntil: true,
@@ -48,6 +49,14 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "INVALID_CREDENTIALS" }, { status: 401 });
+    }
+
+    if (!user.isActive) {
+      if (!user.emailVerified) {
+        return NextResponse.json({ ok: false, error: "ACCOUNT_NOT_VERIFIED" }, { status: 403 });
+      }
+
+      return NextResponse.json({ ok: false, error: "ACCOUNT_DISABLED" }, { status: 403 });
     }
 
     if (user.lockUntil && user.lockUntil.getTime() > Date.now()) {

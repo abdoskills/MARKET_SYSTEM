@@ -11,6 +11,11 @@ type CheckoutApiResponse = {
     id: string;
     orderNumber: string;
     totalAmount: number;
+    changeAmount?: number;
+  };
+  walletUpdate?: {
+    addedAmount: number;
+    newBalance: number;
   };
   receipt?: {
     receiptNumber: string;
@@ -34,23 +39,51 @@ export default function CheckoutPage() {
   const [promoLoading, setPromoLoading] = useState(false);
   const [promoError, setPromoError] = useState<string | null>(null);
   const [promoDiscount, setPromoDiscount] = useState(0);
+  const [isPosMode, setIsPosMode] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"CARD" | "CASH">("CARD");
+  const [receivedAmount, setReceivedAmount] = useState("");
+  const [addChangeToWallet, setAddChangeToWallet] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successOrderNo, setSuccessOrderNo] = useState<string | null>(null);
   const [successReceiptNo, setSuccessReceiptNo] = useState<string | null>(null);
   const [successReceiptHtml, setSuccessReceiptHtml] = useState<string | null>(null);
+  const [walletMessage, setWalletMessage] = useState<string | null>(null);
 
   const finalTotal = Math.max(0, totals.total - promoDiscount);
 
-  const canSubmit = useMemo(
-    () => items.length > 0 && phone.trim().length >= 8 && address.trim().length >= 5 && !submitting,
-    [items.length, phone, address, submitting],
-  );
+  const parsedReceivedAmount = useMemo(() => {
+    const numeric = Number(receivedAmount || 0);
+    return Number.isFinite(numeric) ? numeric : 0;
+  }, [receivedAmount]);
+
+  const changeAmount = useMemo(() => {
+    if (!isPosMode || paymentMethod !== "CASH") return 0;
+    return Math.max(0, parsedReceivedAmount - finalTotal);
+  }, [finalTotal, isPosMode, parsedReceivedAmount, paymentMethod]);
+
+  const canSubmit = useMemo(() => {
+    if (submitting || items.length === 0) return false;
+    if (isPosMode) {
+      if (paymentMethod === "CARD") return true;
+      return parsedReceivedAmount >= finalTotal;
+    }
+
+    return phone.trim().length >= 8 && address.trim().length >= 5;
+  }, [address, finalTotal, isPosMode, items.length, parsedReceivedAmount, paymentMethod, phone, submitting]);
 
   useEffect(() => {
     setPromoDiscount(0);
     setPromoError(null);
   }, [totals.subtotal]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get("mode");
+    const posMode = mode === "pos";
+    setIsPosMode(posMode);
+    setPaymentMethod(posMode ? "CASH" : "CARD");
+  }, []);
 
   const applyPromoCode = async () => {
     if (!promoCode.trim()) {
@@ -88,28 +121,36 @@ export default function CheckoutPage() {
 
   const submitOrder = async () => {
     if (!canSubmit) return;
-    if (!phone.trim()) {
-      setError("رقم الهاتف مطلوب لإتمام الطلب.");
+    if (!isPosMode) {
+      if (!phone.trim()) {
+        setError("رقم الهاتف مطلوب لإتمام الطلب.");
+        return;
+      }
+      if (!address.trim()) {
+        setError("عنوان التوصيل مطلوب لإتمام الطلب.");
+        return;
+      }
+    } else if (paymentMethod === "CASH" && parsedReceivedAmount < finalTotal) {
+      setError("المبلغ المستلم أقل من إجمالي الفاتورة.");
       return;
     }
-    if (!address.trim()) {
-      setError("عنوان التوصيل مطلوب لإتمام الطلب.");
-      return;
-    }
+
     setSubmitting(true);
     setError(null);
+    setWalletMessage(null);
 
     try {
       const response = await fetch("/api/pos/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          channel: "ONLINE",
-          phone: phone.trim() || undefined,
-          address: address.trim(),
+          channel: isPosMode ? "POS" : "ONLINE",
+          phone: !isPosMode ? phone.trim() || undefined : undefined,
+          address: !isPosMode ? address.trim() : undefined,
           promoCode: promoCode.trim() || undefined,
-          paymentMethod: "CARD",
-          receivedAmount: finalTotal,
+          paymentMethod,
+          receivedAmount: paymentMethod === "CASH" ? parsedReceivedAmount : finalTotal,
+          addChangeToWallet: isPosMode ? addChangeToWallet : false,
           items: items.map((item) => ({
             productId: item.id,
             quantity: item.quantity,
@@ -134,6 +175,11 @@ export default function CheckoutPage() {
       setSuccessOrderNo(data.order?.orderNumber ?? "");
       setSuccessReceiptNo(data.receipt?.receiptNumber ?? null);
       setSuccessReceiptHtml(data.receipt?.printableHtml ?? null);
+      if (data.walletUpdate) {
+        setWalletMessage(
+          `تمت إضافة ${data.walletUpdate.addedAmount.toFixed(2)} ج.م للمحفظة. الرصيد الجديد ${data.walletUpdate.newBalance.toFixed(2)} ج.م`,
+        );
+      }
     } catch {
       setError("تعذر الاتصال بالخادم.");
     } finally {
@@ -168,13 +214,14 @@ export default function CheckoutPage() {
   return (
     <main className="min-h-screen bg-[#f7f9fb] p-4 md:p-8" dir="rtl">
       <div className="mx-auto max-w-4xl">
-        <h1 className="mb-4 text-2xl font-black text-[#006c4a]">إتمام الطلب</h1>
+        <h1 className="mb-4 text-2xl font-black text-[#006c4a]">{isPosMode ? "إتمام طلب نقطة البيع" : "إتمام الطلب"}</h1>
 
         {successOrderNo ? (
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
             <p className="text-lg font-black text-[#006c4a]">تم إنشاء الطلب بنجاح ✅</p>
             <p className="mt-2 text-slate-700">رقم الطلب: {successOrderNo}</p>
             {successReceiptNo ? <p className="mt-1 text-slate-700">رقم الإيصال: {successReceiptNo}</p> : null}
+            {walletMessage ? <p className="mt-2 rounded-xl bg-emerald-50 p-3 text-sm font-bold text-emerald-700">{walletMessage}</p> : null}
             <div className="mt-4 flex flex-wrap gap-2">
               <button
                 type="button"
@@ -207,27 +254,82 @@ export default function CheckoutPage() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <h2 className="mb-3 text-lg font-black text-slate-900">العنوان والتواصل</h2>
+              <h2 className="mb-3 text-lg font-black text-slate-900">{isPosMode ? "الدفع" : "العنوان والتواصل"}</h2>
 
-              <label className="mb-3 block">
-                <span className="mb-1 block text-sm font-semibold text-slate-700">رقم الهاتف *</span>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full min-h-[44px] rounded-xl border border-slate-200 px-3"
-                  placeholder="01xxxxxxxxx"
-                />
-              </label>
+              {isPosMode ? (
+                <>
+                  <div className="mb-3 grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-2">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("CASH")}
+                      className={`rounded-xl px-3 py-2 font-bold ${paymentMethod === "CASH" ? "bg-[#006c4a] text-white" : "bg-white text-slate-700"}`}
+                    >
+                      نقداً
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentMethod("CARD");
+                        setAddChangeToWallet(false);
+                      }}
+                      className={`rounded-xl px-3 py-2 font-bold ${paymentMethod === "CARD" ? "bg-[#006c4a] text-white" : "bg-white text-slate-700"}`}
+                    >
+                      بطاقة
+                    </button>
+                  </div>
 
-              <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-slate-700">عنوان التوصيل *</span>
-                <textarea
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="w-full min-h-[120px] rounded-xl border border-slate-200 px-3 py-2"
-                  placeholder="المدينة، الحي، الشارع، رقم المبنى، رقم الشقة"
-                />
-              </label>
+                  {paymentMethod === "CASH" ? (
+                    <>
+                      <label className="mb-2 block">
+                        <span className="mb-1 block text-sm font-semibold text-slate-700">المبلغ المستلم</span>
+                        <input
+                          value={receivedAmount}
+                          onChange={(e) => setReceivedAmount(e.target.value)}
+                          inputMode="decimal"
+                          className="w-full min-h-[44px] rounded-xl border border-slate-200 px-3"
+                          placeholder="0.00"
+                        />
+                      </label>
+
+                      <p className="mb-2 text-sm font-semibold text-slate-600">الفكة المتوقعة: {changeAmount.toFixed(2)} ج.م</p>
+
+                      {changeAmount > 0 ? (
+                        <label className="flex items-center gap-2 rounded-xl bg-amber-50 p-3">
+                          <input
+                            type="checkbox"
+                            checked={addChangeToWallet}
+                            onChange={(e) => setAddChangeToWallet(e.target.checked)}
+                            className="h-4 w-4"
+                          />
+                          <span className="text-sm font-bold text-amber-900">إضافة الفكة للمحفظة</span>
+                        </label>
+                      ) : null}
+                    </>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  <label className="mb-3 block">
+                    <span className="mb-1 block text-sm font-semibold text-slate-700">رقم الهاتف *</span>
+                    <input
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full min-h-[44px] rounded-xl border border-slate-200 px-3"
+                      placeholder="01xxxxxxxxx"
+                    />
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-1 block text-sm font-semibold text-slate-700">عنوان التوصيل *</span>
+                    <textarea
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="w-full min-h-[120px] rounded-xl border border-slate-200 px-3 py-2"
+                      placeholder="المدينة، الحي، الشارع، رقم المبنى، رقم الشقة"
+                    />
+                  </label>
+                </>
+              )}
 
               <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
                 <p className="mb-2 text-sm font-semibold text-slate-700">كود الخصم / العرض</p>
@@ -313,6 +415,18 @@ export default function CheckoutPage() {
                   <span>الإجمالي</span>
                   <span>{finalTotal.toFixed(2)} ج.م</span>
                 </div>
+                {isPosMode && paymentMethod === "CASH" ? (
+                  <>
+                    <div className="mt-1 flex items-center justify-between text-slate-600">
+                      <span>المستلم</span>
+                      <span>{parsedReceivedAmount.toFixed(2)} ج.م</span>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between text-slate-600">
+                      <span>الفكة</span>
+                      <span>{changeAmount.toFixed(2)} ج.م</span>
+                    </div>
+                  </>
+                ) : null}
               </div>
             </section>
           </div>

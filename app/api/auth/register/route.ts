@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth/password";
+import { issueEmailVerificationCode } from "@/lib/auth/verification-token";
+import { sendVerificationEmail } from "@/server/services/email.service";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import type { Role } from "@prisma/client";
@@ -49,19 +51,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, error: "USER_ALREADY_EXISTS" }, { status: 409 });
     }
 
-    await prisma.user.create({
+    const createdUser = await prisma.user.create({
       data: {
         fullName: data.fullName,
         email,
         phone,
         passwordHash: hashPassword(data.password),
         role: "CLIENT" as Role,
-        isActive: true,
+        isActive: Boolean(!email),
       },
-      select: { id: true },
+      select: { id: true, fullName: true, email: true },
     });
 
-    return NextResponse.json({ ok: true }, { status: 201 });
+    if (createdUser.email) {
+      const { code } = await issueEmailVerificationCode(createdUser.email);
+      await sendVerificationEmail({
+        to: createdUser.email,
+        fullName: createdUser.fullName,
+        code,
+      });
+    }
+
+    return NextResponse.json({ ok: true, needsVerification: Boolean(createdUser.email) }, { status: 201 });
   } catch {
     return NextResponse.json({ ok: false, error: "REGISTER_FAILED" }, { status: 500 });
   }
