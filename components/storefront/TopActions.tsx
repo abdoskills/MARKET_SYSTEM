@@ -19,11 +19,11 @@ export default function TopActions({
     <>
       <button
         type="button"
-        className="relative scale-95 active:scale-90 transition-transform cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+        className="relative min-h-[44px] min-w-[44px] rounded-xl border border-slate-200 bg-white text-slate-700 flex items-center justify-center transition hover:bg-slate-50 active:scale-95"
         onClick={openCart}
         aria-label="فتح السلة"
       >
-        <span className="material-symbols-outlined text-slate-600">shopping_cart</span>
+        <span className="material-symbols-outlined text-[20px]">shopping_cart</span>
         {count > 0 && (
           <span className="absolute -top-1 -right-1 bg-[#ba1a1a] text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full">
             {count}
@@ -35,17 +35,17 @@ export default function TopActions({
           {role === "ADMIN" ? (
             <Link
               href="/admin/logs"
-              className="min-h-[44px] px-3 rounded-xl border border-emerald-200 text-emerald-700 text-sm font-bold flex items-center justify-center hover:bg-emerald-50"
+              className="min-h-[44px] px-4 rounded-xl border border-emerald-200 bg-emerald-50/50 text-emerald-700 text-sm font-bold flex items-center justify-center hover:bg-emerald-50"
             >
               Dashboard
             </Link>
           ) : null}
           <Link
             href="/account"
-            className="scale-95 active:scale-90 transition-transform cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="min-h-[44px] min-w-[44px] rounded-xl border border-slate-200 bg-white text-slate-700 flex items-center justify-center transition hover:bg-slate-50 active:scale-95"
             aria-label="الحساب الشخصي"
           >
-            <span className="material-symbols-outlined text-slate-600">account_circle</span>
+            <span className="material-symbols-outlined text-[20px]">account_circle</span>
           </Link>
         </>
       ) : (

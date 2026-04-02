@@ -34,6 +34,7 @@ export default function OrdersManager() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
   async function loadBoard(currentSearch = searchTerm) {
     try {
@@ -54,7 +55,7 @@ export default function OrdersManager() {
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       loadBoard(searchTerm);
-    }, 250);
+    }, 120);
 
     return () => window.clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -68,7 +69,7 @@ export default function OrdersManager() {
   useEffect(() => {
     const interval = window.setInterval(() => {
       void loadBoard(searchTerm);
-    }, 10_000);
+    }, 6_000);
 
     return () => window.clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -80,8 +81,37 @@ export default function OrdersManager() {
   );
 
   async function updateStatus(orderId: string, status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "CANCELED") {
+    if (updatingOrderId) return;
+
+    const prevBoard = board;
+    const movedOrder =
+      board.pending.find((o) => o.id === orderId) ??
+      board.inProgress.find((o) => o.id === orderId) ??
+      board.completed.find((o) => o.id === orderId) ??
+      board.canceled.find((o) => o.id === orderId);
+
+    if (!movedOrder) return;
+
+    const nextOrder = { ...movedOrder, status };
+    const withoutOrder = {
+      pending: board.pending.filter((o) => o.id !== orderId),
+      inProgress: board.inProgress.filter((o) => o.id !== orderId),
+      completed: board.completed.filter((o) => o.id !== orderId),
+      canceled: board.canceled.filter((o) => o.id !== orderId),
+    };
+
+    const optimisticBoard: OrdersBoard = {
+      pending: status === "PENDING" ? [nextOrder, ...withoutOrder.pending] : withoutOrder.pending,
+      inProgress: status === "IN_PROGRESS" ? [nextOrder, ...withoutOrder.inProgress] : withoutOrder.inProgress,
+      completed: status === "COMPLETED" ? [nextOrder, ...withoutOrder.completed] : withoutOrder.completed,
+      canceled: status === "CANCELED" ? [nextOrder, ...withoutOrder.canceled] : withoutOrder.canceled,
+    };
+
     try {
+      setUpdatingOrderId(orderId);
       setError(null);
+      setBoard(optimisticBoard);
+
       const response = await fetch(`/api/orders/${orderId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -90,9 +120,12 @@ export default function OrdersManager() {
 
       const json = (await response.json()) as { ok?: boolean; error?: string };
       if (!response.ok || !json.ok) throw new Error(json.error || "UPDATE_STATUS_FAILED");
-      await loadBoard();
+      void loadBoard(searchTerm);
     } catch {
+      setBoard(prevBoard);
       setError("تعذر تحديث حالة الطلب.");
+    } finally {
+      setUpdatingOrderId(null);
     }
   }
 
@@ -128,39 +161,44 @@ export default function OrdersManager() {
             color="red"
             orders={board.pending}
             loading={loading}
-            actions={(order) => (
+            actions={(order, isUpdating) => (
               <button
                 onClick={() => updateStatus(order.id, "IN_PROGRESS")}
-                className="rounded-lg bg-[#006c4a] px-3 py-1 text-xs font-bold text-white"
+                disabled={isUpdating}
+                className="min-h-[38px] rounded-xl bg-gradient-to-l from-[#006c4a] to-[#2f9a79] px-3 py-1 text-xs font-bold text-white shadow-sm disabled:opacity-60"
               >
-                بدء التجهيز
+                {isUpdating ? "جاري..." : "بدء التجهيز"}
               </button>
             )}
+            updatingOrderId={updatingOrderId}
           />
           <OrderColumn
             title="قيد التجهيز"
             color="amber"
             orders={board.inProgress}
             loading={loading}
-            actions={(order) => (
+            actions={(order, isUpdating) => (
               <div className="flex gap-2">
                 <button
                   onClick={() => updateStatus(order.id, "COMPLETED")}
-                  className="rounded-lg bg-[#006c4a] px-3 py-1 text-xs font-bold text-white"
+                  disabled={isUpdating}
+                  className="min-h-[38px] rounded-xl bg-gradient-to-l from-[#006c4a] to-[#2f9a79] px-3 py-1 text-xs font-bold text-white shadow-sm disabled:opacity-60"
                 >
-                  تم التسليم
+                  {isUpdating ? "جاري..." : "تم التسليم"}
                 </button>
                 <button
                   onClick={() => updateStatus(order.id, "CANCELED")}
-                  className="rounded-lg bg-[#ffdad6] px-3 py-1 text-xs font-bold text-[#93000a]"
+                  disabled={isUpdating}
+                  className="min-h-[38px] rounded-xl border border-[#ffb4ab] bg-[#ffdad6] px-3 py-1 text-xs font-bold text-[#93000a] disabled:opacity-60"
                 >
-                  إلغاء
+                  {isUpdating ? "جاري..." : "إلغاء"}
                 </button>
               </div>
             )}
+            updatingOrderId={updatingOrderId}
           />
-          <OrderColumn title="مكتمل" color="emerald" orders={board.completed} loading={loading} />
-          <OrderColumn title="ملغي" color="slate" orders={board.canceled} loading={loading} />
+          <OrderColumn title="مكتمل" color="emerald" orders={board.completed} loading={loading} updatingOrderId={updatingOrderId} />
+          <OrderColumn title="ملغي" color="slate" orders={board.canceled} loading={loading} updatingOrderId={updatingOrderId} />
         </section>
       </div>
     </div>
@@ -173,12 +211,14 @@ function OrderColumn({
   orders,
   loading,
   actions,
+  updatingOrderId,
 }: {
   title: string;
   color: "red" | "amber" | "emerald" | "slate";
   orders: BoardOrder[];
   loading: boolean;
-  actions?: (order: BoardOrder) => React.ReactNode;
+  actions?: (order: BoardOrder, isUpdating: boolean) => React.ReactNode;
+  updatingOrderId: string | null;
 }) {
   const colorDot =
     color === "red"
@@ -220,7 +260,7 @@ function OrderColumn({
                 <span className="text-xs font-bold text-[#006c4a]" dir="ltr">{formatEgp(order.totalAmount)}</span>
                 <span className="text-[10px] text-slate-400">{order.channel === "ONLINE" ? "Online" : "POS"}</span>
               </div>
-              {actions && <div className="mt-2">{actions(order)}</div>}
+              {actions && <div className="mt-2">{actions(order, updatingOrderId === order.id)}</div>}
             </div>
           ))
         )}

@@ -28,14 +28,17 @@ export default function AdminSidebar({ role }: AdminSidebarProps) {
   return (
     <>
       {/* Mobile Toggle Button */}
-      <div className="md:hidden fixed right-4 top-[max(1rem,env(safe-area-inset-top))] z-50">
-        <button
-          onClick={handleToggle}
-          className="min-h-[44px] min-w-[44px] flex items-center justify-center bg-white border border-gray-200 text-[#006c4a] rounded-xl shadow-sm z-50 focus:outline-none focus:ring-2 focus:ring-[#006c4a]"
-        >
-          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-      </div>
+      {!isOpen ? (
+        <div className="md:hidden fixed left-4 top-[max(1rem,env(safe-area-inset-top))] z-50">
+          <button
+            onClick={handleToggle}
+            className="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-full bg-[#006c4a] text-white shadow-lg shadow-emerald-900/20 focus:outline-none focus:ring-2 focus:ring-white/70"
+            aria-label="فتح القائمة"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
+      ) : null}
 
       {/* Sidebar Overlay (Mobile) */}
       {isOpen && (
@@ -53,7 +56,17 @@ export default function AdminSidebar({ role }: AdminSidebarProps) {
         dir="rtl"
       >
         <div className="p-6 border-b border-gray-50 flex-shrink-0">
-          <h2 className="text-2xl font-bold text-[#006c4a]">نظام الإدارة</h2>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-[#006c4a]">نظام الإدارة</h2>
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="md:hidden min-h-[44px] min-w-[44px] rounded-2xl border border-emerald-200 text-[#006c4a] flex items-center justify-center"
+              aria-label="إغلاق القائمة"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
           {role ? <p className="mt-1 text-xs text-gray-500">الدور: {role}</p> : null}
         </div>
         

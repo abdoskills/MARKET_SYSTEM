@@ -22,28 +22,31 @@ export default async function StorefrontPage({
     <main className="min-h-screen bg-[#f7f9fb] text-[#191c1e] antialiased mb-8 font-sans" dir="rtl">
       {/* Top Navigation Bar */}
       <header className="fixed top-0 w-full z-40 bg-white/80 backdrop-blur-xl shadow-sm">
-        <div className="flex flex-row-reverse justify-between items-center px-4 py-3 w-full max-w-full">
-          <div className="flex items-center gap-4">
-            <TopActions isAuthenticated={Boolean(session)} role={session?.role} />
+        <div className="mx-auto w-full max-w-7xl px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <Link href="/" className="text-lg md:text-xl font-bold tracking-tight text-emerald-700 whitespace-nowrap">Pristine POS</Link>
+            <div className="flex items-center gap-3">
+              <TopActions isAuthenticated={Boolean(session)} role={session?.role} />
+            </div>
           </div>
-          <div className="flex-1 max-w-md mx-4">
-            <form action="/" method="GET" className="relative flex items-center bg-[#e0e3e5] rounded-xl px-4 py-2">
-              <span className="material-symbols-outlined text-slate-600 mr-2 text-sm">search</span>
+
+          <div className="mt-3">
+            <form action="/" method="GET" className="relative flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+              <span className="material-symbols-outlined ml-2 text-slate-500 text-[20px]">search</span>
               <input
                 type="text"
                 name="q"
                 defaultValue={params.q}
-                className="bg-transparent border-none focus:ring-0 text-sm w-full text-right outline-none"
+                className="bg-transparent border-none focus:ring-0 text-sm w-full text-right outline-none placeholder:text-slate-400"
                 placeholder="بحث عن منتجات..."
               />
               {params.category && <input type="hidden" name="category" value={params.category} />}
             </form>
           </div>
-          <Link href="/" className="text-xl font-bold tracking-tight text-emerald-700">Pristine POS</Link>
         </div>
       </header>
 
-      <div className="pt-20 px-6 max-w-7xl mx-auto">
+      <div className="pt-32 px-4 md:px-6 max-w-7xl mx-auto">
         {/* Hero Section */}
         <section className="mt-4 mb-8">
           <div className="relative h-48 md:h-72 rounded-2xl overflow-hidden shadow-[0_20px_40px_rgba(25,28,30,0.06)]">
