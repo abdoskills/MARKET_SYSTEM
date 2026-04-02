@@ -1,16 +1,30 @@
 import nodemailer from "nodemailer";
 import { buildReceiptEmailHtml } from "@/server/templates/receipt";
 
-const SMTP_USER = process.env.SMTP_USER ?? "abdoskills27@gmail.com";
-const SMTP_PASSWORD = process.env.SMTP_PASSWORD ?? "hbuv esys babw nzue";
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASSWORD = process.env.SMTP_PASSWORD;
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_PORT = Number(process.env.SMTP_PORT ?? 587);
+const SMTP_SECURE = String(process.env.SMTP_SECURE ?? "false") === "true";
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: SMTP_USER,
-    pass: SMTP_PASSWORD,
-  },
-});
+const transporter = SMTP_HOST
+  ? nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_SECURE,
+      auth: SMTP_USER && SMTP_PASSWORD ? { user: SMTP_USER, pass: SMTP_PASSWORD } : undefined,
+    })
+  : nodemailer.createTransport({
+      service: "gmail",
+      auth: SMTP_USER && SMTP_PASSWORD ? { user: SMTP_USER, pass: SMTP_PASSWORD } : undefined,
+    });
+
+function getFromAddress(fallbackName: string) {
+  if (!SMTP_USER) {
+    throw new Error("SMTP_NOT_CONFIGURED");
+  }
+  return `"${fallbackName}" <${SMTP_USER}>`;
+}
 
 type VerificationEmailInput = {
   to: string;
@@ -101,7 +115,7 @@ export async function sendVerificationEmail(input: VerificationEmailInput) {
 
   try {
     await transporter.sendMail({
-      from: `"L'Artisan Laitier Security" <${SMTP_USER}>`,
+      from: getFromAddress("L'Artisan Laitier Security"),
       to: input.to,
       subject: "Verify your L'Artisan Laitier account",
       html,
@@ -130,7 +144,7 @@ export async function sendPasswordResetEmail(input: PasswordResetEmailInput) {
   });
 
   await transporter.sendMail({
-    from: `"L'Artisan Laitier Security" <${SMTP_USER}>`,
+    from: getFromAddress("L'Artisan Laitier Security"),
     to: input.to,
     subject: "Password reset for L'Artisan Laitier",
     html,
@@ -151,7 +165,7 @@ export async function sendReceipt(input: ReceiptEmailInput) {
   });
 
   await transporter.sendMail({
-    from: `"L'Artisan Laitier Receipts" <${SMTP_USER}>`,
+    from: getFromAddress("L'Artisan Laitier Receipts"),
     to: input.to,
     subject: `إيصال الطلب ${input.order.orderNumber}`,
     html,

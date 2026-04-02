@@ -34,16 +34,17 @@ export async function POST(request: NextRequest) {
     }
 
     const { code } = await issueEmailVerificationCode(user.email);
-    void sendVerificationEmail({
+    await sendVerificationEmail({
       to: user.email,
       fullName: user.fullName,
       code,
-    }).catch((error) => {
-      console.error("Verification resend failed:", error);
     });
 
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === "SMTP_NOT_CONFIGURED") {
+      return NextResponse.json({ ok: false, error: "EMAIL_NOT_CONFIGURED" }, { status: 500 });
+    }
     return NextResponse.json({ ok: false, error: "VERIFY_REQUEST_FAILED" }, { status: 500 });
   }
 }

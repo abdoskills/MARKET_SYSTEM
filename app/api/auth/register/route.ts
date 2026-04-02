@@ -67,17 +67,18 @@ export async function POST(request: NextRequest) {
 
     if (createdUser.email) {
       const { code } = await issueEmailVerificationCode(createdUser.email);
-      void sendVerificationEmail({
+      await sendVerificationEmail({
         to: createdUser.email,
         fullName: createdUser.fullName,
         code,
-      }).catch((error) => {
-        console.error("Verification email enqueue failed:", error);
       });
     }
 
     return NextResponse.json({ ok: true, needsVerification: Boolean(createdUser.email) }, { status: 201 });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === "SMTP_NOT_CONFIGURED") {
+      return NextResponse.json({ ok: false, error: "EMAIL_NOT_CONFIGURED" }, { status: 500 });
+    }
     return NextResponse.json({ ok: false, error: "REGISTER_FAILED" }, { status: 500 });
   }
 }
