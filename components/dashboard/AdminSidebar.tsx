@@ -17,7 +17,7 @@ export default function AdminSidebar({ role }: AdminSidebarProps) {
     { name: "الصفحة الرئيسية", href: "/", icon: Home },
     { name: "لوحة القيادة", href: "/admin/logs", icon: LayoutDashboard },
     { name: "المخزون", href: "/inventory", icon: Package },
-    { name: "الطلبات", href: "/orders", icon: ShoppingCart },
+    { name: "الطلبات", href: "/admin/orders", icon: ShoppingCart },
     { name: "التحليلات", href: "/analytics", icon: BarChart2 },
     { name: "المستخدمين", href: "/users", icon: Users },
     ...(role === "ADMIN" ? [{ name: "العروض والكوبونات", href: "/admin/offers", icon: TicketPercent }] : []),

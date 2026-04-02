@@ -8,7 +8,7 @@ type RouteRule = {
 
 const PAGE_RULES: RouteRule[] = [
   { prefix: "/pos", roles: ["ADMIN", "MANAGER", "CASHIER"] },
-  { prefix: "/orders", roles: ["ADMIN", "MANAGER", "CASHIER"] },
+  { prefix: "/admin/orders", roles: ["ADMIN", "MANAGER", "CASHIER"] },
   { prefix: "/analytics", roles: ["ADMIN", "MANAGER"] },
   { prefix: "/inventory", roles: ["ADMIN", "MANAGER"] },
   { prefix: "/admin", roles: ["ADMIN"] },
@@ -18,7 +18,6 @@ const PAGE_RULES: RouteRule[] = [
 const API_RULES: RouteRule[] = [
   { prefix: "/api/pos", roles: ["ADMIN", "MANAGER", "CASHIER"] },
   { prefix: "/api/sync", roles: ["ADMIN", "MANAGER", "CASHIER"] },
-  { prefix: "/api/orders", roles: ["ADMIN", "MANAGER", "CASHIER"] },
   { prefix: "/api/analytics", roles: ["ADMIN", "MANAGER"] },
   { prefix: "/api/admin", roles: ["ADMIN"] },
   { prefix: "/api/inventory", roles: ["ADMIN", "MANAGER"] },
@@ -51,6 +50,26 @@ export async function middleware(request: NextRequest) {
 
   if (pathname === "/api/pos/checkout") {
     return NextResponse.next();
+  }
+
+  // Also specifically block regular /orders from unauthenticated users
+  if (pathname === "/orders" || pathname.startsWith("/orders/")) {
+    const token = request.cookies.get(getAuthCookieName())?.value;
+    if (!token) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.search = "";
+      return NextResponse.redirect(loginUrl);
+    }
+    try {
+      await verifySessionToken(token);
+      return NextResponse.next();
+    } catch {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.search = "";
+      return clearAuthCookie(NextResponse.redirect(loginUrl));
+    }
   }
 
   const isApi = pathname.startsWith("/api/");
@@ -113,10 +132,11 @@ export const config = {
   matcher: [
     "/pos/:path*",
     "/orders/:path*",
+    "/admin/:path*",
     "/analytics/:path*",
     "/inventory/:path*",
-    "/admin/:path*",
     "/users/:path*",
     "/api/:path*",
   ],
 };
+
