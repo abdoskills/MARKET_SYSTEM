@@ -212,13 +212,13 @@ export default function CheckoutPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f7f9fb] p-4 md:p-8" dir="rtl">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-emerald-50 via-slate-50 to-white p-4 md:p-8" dir="rtl">
       <div className="mx-auto max-w-4xl">
-        <h1 className="mb-4 text-2xl font-black text-[#006c4a]">{isPosMode ? "إتمام طلب نقطة البيع" : "إتمام الطلب"}</h1>
+        <h1 className="text-2xl font-black text-[#003527] mb-6 font-serif tracking-tight">{isPosMode ? "إتمام طلب نقطة البيع" : "إتمام الطلب"}</h1>
 
         {successOrderNo ? (
-          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-            <p className="text-lg font-black text-[#006c4a]">تم إنشاء الطلب بنجاح ✅</p>
+          <div className="rounded-3xl border-none bg-white/80 backdrop-blur-xl p-8 shadow-ambient">
+            <p className="text-lg font-black text-[#003527]">تم إنشاء الطلب بنجاح ✅</p>
             <p className="mt-2 text-slate-700">رقم الطلب: {successOrderNo}</p>
             {successReceiptNo ? <p className="mt-1 text-slate-700">رقم الإيصال: {successReceiptNo}</p> : null}
             {walletMessage ? <p className="mt-2 rounded-xl bg-emerald-50 p-3 text-sm font-bold text-emerald-700">{walletMessage}</p> : null}
@@ -239,22 +239,22 @@ export default function CheckoutPage() {
               >
                 طباعة الإيصال
               </button>
-              <Link href="/" className="inline-flex min-h-[44px] items-center rounded-xl bg-[#006c4a] px-4 text-white font-bold">
+              <Link href="/" className="inline-flex min-h-[44px] items-center rounded-xl bg-[#003527] px-4 text-white font-bold">
                 العودة للرئيسية
               </Link>
             </div>
           </div>
         ) : items.length === 0 ? (
-          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+          <div className="rounded-3xl border-none bg-white/80 backdrop-blur-xl p-8 shadow-ambient">
             <p className="text-slate-600">لا توجد عناصر في السلة.</p>
-            <Link href="/" className="mt-4 inline-flex min-h-[44px] items-center rounded-xl bg-[#006c4a] px-4 text-white font-bold">
+            <Link href="/" className="mt-4 inline-flex min-h-[44px] items-center rounded-xl bg-[#003527] px-4 text-white font-bold">
               ابدأ التسوق
             </Link>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
-            <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <h2 className="mb-3 text-lg font-black text-slate-900">{isPosMode ? "الدفع" : "العنوان والتواصل"}</h2>
+            <section className="rounded-3xl border-none bg-white/80 backdrop-blur-xl p-6 shadow-ambient">
+              <h2 className="text-xl font-bold font-serif tracking-tight text-[#003527] mb-5">{isPosMode ? "الدفع" : "العنوان والتواصل"}</h2>
 
               {isPosMode ? (
                 <>
@@ -262,7 +262,7 @@ export default function CheckoutPage() {
                     <button
                       type="button"
                       onClick={() => setPaymentMethod("CASH")}
-                      className={`rounded-xl px-3 py-2 font-bold ${paymentMethod === "CASH" ? "bg-[#006c4a] text-white" : "bg-white text-slate-700"}`}
+                      className={`rounded-xl px-3 py-2 font-bold ${paymentMethod === "CASH" ? "bg-[#003527] text-white" : "bg-white text-slate-700"}`}
                     >
                       نقداً
                     </button>
@@ -272,7 +272,7 @@ export default function CheckoutPage() {
                         setPaymentMethod("CARD");
                         setAddChangeToWallet(false);
                       }}
-                      className={`rounded-xl px-3 py-2 font-bold ${paymentMethod === "CARD" ? "bg-[#006c4a] text-white" : "bg-white text-slate-700"}`}
+                      className={`rounded-xl px-3 py-2 font-bold ${paymentMethod === "CARD" ? "bg-[#003527] text-white" : "bg-white text-slate-700"}`}
                     >
                       بطاقة
                     </button>
@@ -286,7 +286,7 @@ export default function CheckoutPage() {
                           value={receivedAmount}
                           onChange={(e) => setReceivedAmount(e.target.value)}
                           inputMode="decimal"
-                          className="w-full min-h-[44px] rounded-xl border border-slate-200 px-3"
+                          className="w-full min-h-[48px] bg-surface-container-lowest text-[#1c1c18] rounded-xl border border-[#e5e2db] px-4 outline-none focus:border-[#003527] focus:ring-1 focus:ring-[#003527] transition-all font-sans placeholder:text-[#bfc9c3]"
                           placeholder="0.00"
                         />
                       </label>
@@ -314,7 +314,7 @@ export default function CheckoutPage() {
                     <input
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full min-h-[44px] rounded-xl border border-slate-200 px-3"
+                      className="w-full min-h-[48px] bg-surface-container-lowest text-[#1c1c18] rounded-xl border border-[#e5e2db] px-4 outline-none focus:border-[#003527] focus:ring-1 focus:ring-[#003527] transition-all font-sans placeholder:text-[#bfc9c3]"
                       placeholder="01xxxxxxxxx"
                     />
                   </label>
@@ -324,7 +324,7 @@ export default function CheckoutPage() {
                     <textarea
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      className="w-full min-h-[120px] rounded-xl border border-slate-200 px-3 py-2"
+                      className="w-full min-h-[120px] bg-surface-container-lowest text-[#1c1c18] rounded-xl border border-[#e5e2db] px-4 py-3 outline-none focus:border-[#003527] focus:ring-1 focus:ring-[#003527] transition-all font-sans placeholder:text-[#bfc9c3] resize-none"
                       placeholder="المدينة، الحي، الشارع، رقم المبنى، رقم الشقة"
                     />
                   </label>
@@ -338,13 +338,13 @@ export default function CheckoutPage() {
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                     placeholder="مثال: SAVE10"
-                    className="min-h-[44px] flex-1 rounded-xl border border-slate-200 px-3"
+                    className="min-h-[48px] flex-1 bg-surface-container-lowest text-[#1c1c18] rounded-xl border border-[#e5e2db] px-4 outline-none focus:border-[#003527] focus:ring-1 focus:ring-[#003527] transition-all font-sans placeholder:text-[#bfc9c3]"
                   />
                   <button
                     type="button"
                     onClick={applyPromoCode}
                     disabled={promoLoading}
-                    className="min-h-[44px] rounded-xl bg-[#006c4a] px-4 text-white font-bold disabled:opacity-60"
+                    className="min-h-[48px] rounded-xl bg-[#003527] px-6 text-white font-bold disabled:opacity-60 shadow-md hover:bg-[#064e3b] active:scale-[0.98] transition-all font-sans"
                   >
                     {promoLoading ? "..." : "تطبيق"}
                   </button>
@@ -361,14 +361,14 @@ export default function CheckoutPage() {
                 type="button"
                 onClick={submitOrder}
                 disabled={!canSubmit}
-                className="mt-4 w-full min-h-[44px] rounded-xl bg-[#006c4a] text-white font-bold disabled:opacity-60"
+                className="mt-4 w-full min-h-[48px] rounded-xl bg-[#003527] text-white font-bold disabled:opacity-60 shadow-md hover:bg-[#064e3b] active:scale-[0.98] transition-all font-sans"
               >
                 {submitting ? "جاري تأكيد الطلب..." : "تأكيد الطلب"}
               </button>
             </section>
 
-            <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <h2 className="mb-3 text-lg font-black text-slate-900">ملخص الطلب</h2>
+            <section className="rounded-3xl border-none bg-white/80 backdrop-blur-xl p-6 shadow-ambient">
+              <h2 className="text-xl font-bold font-serif tracking-tight text-[#003527] mb-5">ملخص الطلب</h2>
 
               <div className="space-y-2">
                 {items.map((item) => (
@@ -411,7 +411,7 @@ export default function CheckoutPage() {
                   <span>الخصم</span>
                   <span>-{promoDiscount.toFixed(2)} ج.م</span>
                 </div>
-                <div className="mt-2 flex items-center justify-between text-lg font-black text-[#006c4a]">
+                <div className="mt-2 flex items-center justify-between text-lg font-black text-[#003527]">
                   <span>الإجمالي</span>
                   <span>{finalTotal.toFixed(2)} ج.م</span>
                 </div>

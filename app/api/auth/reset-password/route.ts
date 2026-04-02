@@ -28,10 +28,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, error: "INVALID_OR_EXPIRED_TOKEN" }, { status: 400 });
     }
 
+    const passwordHash = await hashPassword(parsed.data.password);
+
     await prisma.user.updateMany({
       where: { email: { equals: consumed.email, mode: "insensitive" } },
       data: {
-        passwordHash: hashPassword(parsed.data.password),
+        passwordHash,
         loginAttempts: 0,
         lockUntil: null,
       },

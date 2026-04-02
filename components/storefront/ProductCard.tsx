@@ -47,8 +47,8 @@ export default function ProductCard({ product, id, name, price, imageUrl, onAddT
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col group">
-      <div className="relative aspect-square bg-gray-50 flex items-center justify-center overflow-hidden p-4">
+    <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-ambient hover:-translate-y-2 transition-all duration-500 border-none overflow-hidden flex flex-col group">
+      <div className="relative aspect-square bg-surface-container-lowest flex items-center justify-center overflow-hidden p-4">
         {hasImage ? (
           canUseNextImage ? (
           <Image 
@@ -68,20 +68,20 @@ export default function ProductCard({ product, id, name, price, imageUrl, onAddT
             />
           )
         ) : (
-          <div className="w-20 h-20 bg-soft-mint rounded-full flex items-center justify-center">
-            <span className="text-emerald-base font-bold text-3xl">{resolvedName.charAt(0)}</span>
+          <div className="w-20 h-20 bg-[#e5e2db] rounded-full flex items-center justify-center">
+            <span className="text-[#003527] font-bold text-3xl">{resolvedName.charAt(0)}</span>
           </div>
         )}
       </div>
       
-      <div className="p-4 lg:p-5 flex flex-col flex-grow bg-white">
-        <h3 className="font-semibold text-gray-800 text-lg mb-1 line-clamp-2 leading-tight min-h-[44px]">{resolvedName}</h3>
+      <div className="p-4 lg:p-5 flex flex-col flex-grow bg-transparent">
+        <h3 className="font-bold text-[#1c1c18] text-lg mb-1 line-clamp-2 leading-tight min-h-[44px]">{resolvedName}</h3>
         <div className="mt-auto pt-3 flex flex-col gap-3">
-          <p className="text-emerald-base font-black text-xl">{formatEgp(resolvedPrice)}</p>
+          <p className="text-[#003527] font-black text-xl font-serif">{formatEgp(resolvedPrice)}</p>
           
           <button 
             onClick={handleAdd}
-            className="w-full min-h-[48px] bg-soft-mint text-emerald-base rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-base hover:text-white transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-emerald-base focus:ring-offset-2"
+            className="w-full min-h-[48px] bg-[#e5e2db] text-[#003527] rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#003527] hover:text-white transition-all active:scale-[0.98] focus:outline-none focus:ring-1 focus:ring-[#003527]"
           >
             <ShoppingCart className="w-5 h-5" />
             <span>إضافة إلى السلة</span>

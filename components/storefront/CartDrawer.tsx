@@ -338,44 +338,38 @@ export default function CartDrawer() {
               <p className="rounded-xl bg-white p-6 text-center text-sm font-bold text-[#404944] shadow-sm">لا توجد عناصر في السلة.</p>
             ) : (
               items.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(28,28,24,0.04)]">
-                  {/* Right - Product details */}
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[#f6f3ec] flex items-center justify-center">
-                      {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.nameAr} className="h-full w-full object-cover" />
-                      ) : (
-                        <span className="material-symbols-outlined text-3xl text-[#003527]/20">inventory_2</span>
-                      )}
-                    </div>
-                    <div className="flex flex-col">
-                      <p className="text-base font-bold text-[#1c1c18] leading-tight">{item.nameAr}</p>
-                      <p className="mt-1 text-xs font-semibold text-[#404944]">
-                        {item.unit || "قطعة"}
-                      </p>
-                    </div>
+                <div key={item.id} className="bg-[#f6f3ec] p-4 flex items-center gap-4 group rounded-none">
+                  {/* Right - Image & Details */}
+                  <div className="w-20 h-20 bg-white overflow-hidden rounded shadow-sm shrink-0 flex items-center justify-center">
+                    {item.imageUrl ? (
+                      <img src={item.imageUrl} alt={item.nameAr} className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="material-symbols-outlined text-3xl text-[#003527]/20" style={{ fontVariationSettings: "'FILL' 1" }}>inventory_2</span>
+                    )}
                   </div>
-
+                  <div className="flex-grow">
+                    <h3 className="font-serif text-lg font-bold text-[#1c1c18] leading-tight">{item.nameAr}</h3>
+                    <p className="font-sans text-sm text-[#404944] mt-1">{item.unit || "قطعة"}</p>
+                  </div>
+                  
                   {/* Left - Price & Quantity */}
-                  <div className="flex flex-col items-end gap-2 shrink-0">
-                    <p className="text-base font-bold text-[#003527]">
-                      {item.salePrice.toFixed(2)} <span className="text-xs">ج.م</span>
+                  <div className="text-left shrink-0">
+                    <p className="font-bold font-sans text-[#003527]">
+                      {item.salePrice.toFixed(2)} ج.م
                     </p>
-                    <div className="flex items-center rounded-lg border border-[#e5e2db] bg-white h-8">
-                      <button 
-                        onClick={() => setQuantity(item.id, item.quantity + 1)}
-                        className="flex h-full w-8 items-center justify-center text-[#003527] hover:bg-[#f6f3ec] transition-colors"
-                      >
-                        +
-                      </button>
-                      <span className="flex h-full w-8 items-center justify-center border-x border-[#e5e2db] text-sm font-bold text-[#1c1c18]">
-                        {item.quantity}
-                      </span>
+                    <div className="flex items-center justify-start gap-2 mt-1" dir="ltr">
                       <button 
                         onClick={() => setQuantity(item.id, item.quantity - 1)}
-                        className="flex h-full w-8 items-center justify-center text-[#404944] hover:bg-[#f6f3ec] transition-colors"
+                        className="w-6 h-6 border font-sans border-[#bfc9c3] rounded flex items-center justify-center text-xs hover:bg-[#e5e2db] transition-colors"
                       >
                         -
+                      </button>
+                      <span className="text-sm font-bold font-sans w-4 text-center">{item.quantity}</span>
+                      <button 
+                        onClick={() => setQuantity(item.id, item.quantity + 1)}
+                        className="w-6 h-6 border font-sans border-[#bfc9c3] rounded flex items-center justify-center text-xs hover:bg-[#e5e2db] transition-colors text-[#003527]"
+                      >
+                        +
                       </button>
                     </div>
                   </div>
@@ -384,34 +378,30 @@ export default function CartDrawer() {
             )}
           </div>
 
-          <div className="rounded-2xl bg-white p-5 shadow-[0_4px_24px_rgba(28,28,24,0.04)] mb-4">
-            <div className="flex justify-between items-center mb-2">
-              <p className="text-sm font-bold text-[#404944]">المجموع الفرعي</p>
-              <p className="font-bold text-[#1c1c18]">{subtotal} <span className="text-xs">ج.م</span></p>
+          <section className="bg-white p-6 rounded-xl shadow-[0_4px_24px_rgba(28,28,24,0.06)] space-y-4 mb-4">
+            <div className="flex justify-between items-center text-[#404944]">
+              <span className="font-sans">المجموع الفرعي</span>
+              <span className="font-medium font-sans">{subtotal} ر.س</span>
             </div>
-            <div className="flex justify-between items-center mb-4 border-b border-[#f6f3ec] pb-4 border-dashed">
-              <p className="text-sm font-bold text-[#404944]">الضريبة (15%)</p>
-              <p className="font-bold text-[#1c1c18]">{totals.tax.toFixed(2)} <span className="text-xs">ج.م</span></p>
+            <div className="flex justify-between items-center text-[#404944]">
+              <span className="font-sans">الضريبة (15%)</span>
+              <span className="font-medium font-sans">{totals.tax.toFixed(2)} ر.س</span>
             </div>
-            <div className="flex justify-between items-center">
-              <p className="font-serif text-lg font-black text-[#003527]">الإجمالي</p>
-              <p className="font-serif text-2xl font-black text-[#003527]">{totals.total.toFixed(2)} <span className="text-sm">ج.م</span></p>
+            <div className="border-t border-dashed border-[#bfc9c3] my-4"></div>
+            <div className="flex justify-between items-center text-xl font-bold text-[#003527]">
+              <span className="font-serif">الإجمالي</span>
+              <span className="font-sans">{finalTotal} ر.س</span>
             </div>
-          </div>
-
-          <div className="mt-4 flex gap-3">
             <button
               type="button"
               onClick={handleOpenCheckout}
               disabled={items.length === 0}
-              className="flex-1 rounded-xl bg-[#003527] py-4 text-base font-bold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+              className="w-full mt-6 bg-[#003527] text-white py-5 rounded-lg flex items-center justify-center gap-3 hover:bg-[#064e3b] active:scale-[0.98] transition-transform shadow-lg disabled:cursor-not-allowed disabled:opacity-40"
             >
-              الدفع والطباعة
+              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>print</span>
+              <span className="text-lg font-bold font-sans">الدفع والطباعة</span>
             </button>
-            <button type="button" onClick={clearCart} className="rounded-xl border-2 border-[#e5e2db] bg-transparent w-20 flex items-center justify-center text-sm font-bold text-[#404944] hover:bg-[#f6f3ec]">
-              تفريغ
-            </button>
-          </div>
+          </section>
         </aside>
       </div>
 

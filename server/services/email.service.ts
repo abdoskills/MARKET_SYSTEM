@@ -54,23 +54,23 @@ function renderShell(input: { title: string; subtitle: string; contentHtml: stri
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${input.title}</title>
   </head>
-  <body style="margin:0; padding:24px; background:#ecf6f1; font-family:'Be Vietnam Pro', Inter, Segoe UI, Arial, sans-serif; color:#0f172a;">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px; margin:0 auto; background:#f6fbf9; border-radius:32px; padding:32px; border:none;">
+  <body style="margin:0; padding:24px; background:#fcf9f2; font-family:'Be Vietnam Pro', Inter, Segoe UI, Arial, sans-serif; color:#404944;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px; margin:0 auto; background:#ffffff; border-radius:40px; padding:40px 32px; border:none; box-shadow:0 28px 90px rgba(0,53,39,0.09);">
       <tr>
         <td style="text-align:center;">
-          <div style="display:inline-block; background:#d8eee4; color:#006c4a; padding:10px 18px; border-radius:999px; font-weight:700; font-size:13px; letter-spacing:.3px;">L'Artisan Laitier</div>
-          <h1 style="margin:16px 0 8px; font-size:30px; line-height:1.2; color:#006c4a; font-weight:800;">${input.title}</h1>
-          <p style="margin:0 0 24px; color:#4b5563; font-size:15px;">${input.subtitle}</p>
+          <div style="display:inline-block; color:#003527; font-family:'Noto Serif', Georgia, 'Times New Roman', serif; font-style:italic; font-weight:700; font-size:24px; letter-spacing:.2px;">L'Artisan Laitier</div>
+          <h1 style="margin:22px 0 10px; font-size:36px; line-height:1.2; color:#003527; font-family:'Noto Serif', Georgia, 'Times New Roman', serif; font-weight:700;">${input.title}</h1>
+          <p style="margin:0 0 26px; color:#404944; font-size:15px;">${input.subtitle}</p>
         </td>
       </tr>
       <tr>
-        <td style="background:#ffffff; border-radius:32px; padding:28px; border:none;">
+        <td style="background:#ffffff; border-radius:24px; padding:4px; border:none;">
           ${input.contentHtml}
         </td>
       </tr>
       <tr>
-        <td style="padding-top:18px; text-align:center; color:#6b7280; font-size:12px;">
-          Verdant Ledger security notice • This email was sent automatically.
+        <td style="padding-top:26px; text-align:center; color:#7b857f; font-size:11px; letter-spacing:1.6px; text-transform:uppercase; font-weight:600;">
+          Verdant Ledger Security Notice
         </td>
       </tr>
     </table>
@@ -79,27 +79,37 @@ function renderShell(input: { title: string; subtitle: string; contentHtml: stri
 }
 
 export async function sendVerificationEmail(input: VerificationEmailInput) {
+  const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+  const confirmLink = `${appUrl}/verify?email=${encodeURIComponent(input.to)}`;
   const greeting = input.fullName?.trim() ? `Hi ${input.fullName.trim()},` : "Hi,";
 
   const html = renderShell({
     title: "Verify your email",
     subtitle: "Use this secure 6-digit code within 10 minutes.",
     contentHtml: `
-      <p style="margin:0 0 16px; font-size:15px; color:#111827;">${greeting}</p>
-      <p style="margin:0 0 22px; font-size:14px; color:#374151;">Enter this code on the verification page to activate your account.</p>
-      <div style="text-align:center; margin:0 0 22px;">
-        <span style="display:inline-block; background:#e8f4ef; color:#006c4a; border-radius:18px; padding:14px 20px; font-size:32px; letter-spacing:8px; font-weight:800;">${input.code}</span>
+      <p style="margin:0 0 14px; font-size:15px; color:#404944;">${greeting}</p>
+      <p style="margin:0 0 22px; font-size:14px; color:#404944;">Enter this code on the verification page to activate your account.</p>
+      <div style="margin:0 0 22px; border-radius:24px; padding:24px 16px; text-align:center; background:linear-gradient(135deg, #10b981 0%, #064e3b 100%); box-shadow:0 18px 36px rgba(6,78,59,0.25);">
+        <span style="display:inline-block; color:#F59E0B; font-size:34px; letter-spacing:0.4em; font-weight:800;">${input.code}</span>
       </div>
-      <p style="margin:0; font-size:13px; color:#6b7280;">If you did not create an account, you can ignore this message.</p>
+      <div style="text-align:center; margin:0 0 18px;">
+        <a href="${confirmLink}" style="display:inline-block; background:#003527; color:#ffffff; text-decoration:none; border-radius:14px; padding:12px 22px; font-weight:700; box-shadow:0 10px 24px rgba(0,53,39,0.26);">Confirm Account</a>
+      </div>
+      <p style="margin:0; font-size:13px; color:#64716b;">If you did not create an account, you can ignore this message.</p>
     `,
   });
 
-  await transporter.sendMail({
-    from: `"L'Artisan Laitier Security" <${SMTP_USER}>`,
-    to: input.to,
-    subject: "Verify your L'Artisan Laitier account",
-    html,
-  });
+  try {
+    await transporter.sendMail({
+      from: `"L'Artisan Laitier Security" <${SMTP_USER}>`,
+      to: input.to,
+      subject: "Verify your L'Artisan Laitier account",
+      html,
+    });
+  } catch (error) {
+    console.error("Failed to send verification email:", error);
+    throw error;
+  }
 }
 
 export async function sendPasswordResetEmail(input: PasswordResetEmailInput) {

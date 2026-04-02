@@ -26,18 +26,20 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findFirst({
       where: { email: { equals: email, mode: "insensitive" } },
-      select: { fullName: true, email: true, emailVerified: true },
+      select: { fullName: true, email: true, isActive: true },
     });
 
-    if (!user?.email || user.emailVerified) {
+    if (!user?.email || user.isActive) {
       return NextResponse.json({ ok: true });
     }
 
     const { code } = await issueEmailVerificationCode(user.email);
-    await sendVerificationEmail({
+    void sendVerificationEmail({
       to: user.email,
       fullName: user.fullName,
       code,
+    }).catch((error) => {
+      console.error("Verification resend failed:", error);
     });
 
     return NextResponse.json({ ok: true });

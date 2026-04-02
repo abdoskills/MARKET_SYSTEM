@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validPassword = verifyPassword(password, user.passwordHash);
+    const validPassword = await verifyPassword(password, user.passwordHash);
     if (!validPassword) {
       const nextAttempts = user.loginAttempts + 1;
       const shouldLock = nextAttempts >= 5;

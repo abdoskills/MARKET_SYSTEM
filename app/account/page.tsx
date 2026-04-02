@@ -36,9 +36,9 @@ export default async function AccountPage() {
   const email = walletProfile?.email || "";
 
   return (
-    <main className="min-h-[max(884px,100dvh)] pb-24 lg:pb-0 transition-colors bg-[#fcf9f2] text-[#1c1c18] font-sans antialiased" dir="rtl">
+    <main className="min-h-[max(884px,100dvh)] pb-24 lg:pb-0 transition-colors bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-emerald-50 via-slate-50 to-white text-[#1c1c18] font-sans antialiased" dir="rtl">
       {/* Top Navigation Bar */}
-      <header className="fixed top-0 z-50 w-full bg-[#fcf9f2]/80 backdrop-blur-xl dark:bg-[#002117]/80">
+      <header className="fixed top-0 z-50 w-full bg-white/80 backdrop-blur-xl dark:bg-[#002117]/80">
         <div className="flex w-full items-center justify-between px-6 py-4">
           <Link href="/" className="scale-102 transition-transform active:scale-95 text-[#003527] dark:text-emerald-50">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>arrow_forward</span>
@@ -84,16 +84,16 @@ export default async function AccountPage() {
               </div>
 
               {/* Wallet Bento Component replacing Points */}
-              <div className="mt-6 flex w-full items-center justify-between rounded-xl bg-[#f6f3ec] p-6">
+              <div className="mt-6 flex w-full items-center justify-between rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 shadow-[0_20px_50px_rgba(16,185,129,0.3)] p-6">
                 <div className="text-right">
-                  <p className="mb-1 font-sans text-xs uppercase tracking-widest text-[#404944]">الرصيد الحالي</p>
-                  <p className="font-serif text-2xl font-bold text-[#003527]">{formatEgp(walletBalance)}</p>
+                  <p className="mb-1 font-sans text-xs uppercase tracking-widest text-emerald-50">الرصيد الحالي</p>
+                  <p className="font-serif text-2xl font-bold text-[#F59E0B] drop-shadow-md">{formatEgp(walletBalance)}</p>
                 </div>
-                <div className="flex items-center gap-3 rounded-lg bg-[#064e3b]/10 p-4">
-                  <span className="material-symbols-outlined text-3xl text-[#735c00]" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance_wallet</span>
+                <div className="flex items-center gap-3 rounded-lg bg-black/20 backdrop-blur-sm p-4">
+                  <span className="material-symbols-outlined text-3xl text-[#F59E0B]" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance_wallet</span>
                   <div className="text-right">
-                    <p className="text-xs font-bold text-[#003527]">محفظة الفكة</p>
-                    <p className="text-[10px] text-[#404944]">تضاف الفكة تلقائياً هنا</p>
+                    <p className="text-xs font-bold text-white">محفظة الفكة</p>
+                    <p className="text-[10px] text-emerald-100">تضاف الفكة تلقائياً هنا</p>
                   </div>
                 </div>
               </div>
@@ -103,7 +103,7 @@ export default async function AccountPage() {
             <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
               
               {/* Recent Transactions (Replaces My Orders) */}
-              <div className="rounded-lg bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md border-r-4 border-[#003527]">
+              <div className="rounded-lg bg-white/80 backdrop-blur-md p-6 shadow-ambient transition-all duration-300 hover:shadow-lg border-none">
                 <div className="mb-6 flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="rounded bg-[#f6f3ec] p-2">
@@ -137,7 +137,7 @@ export default async function AccountPage() {
               </div>
 
               {/* Saved Addresses / Information equivalent */}
-              <div className="rounded-lg bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
+              <div className="rounded-lg bg-white/80 backdrop-blur-md p-6 shadow-ambient transition-all duration-300 border-none hover:shadow-lg">
                 <div className="mb-6 flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="rounded bg-[#f6f3ec] p-2">
@@ -159,7 +159,7 @@ export default async function AccountPage() {
               </div>
 
               {/* Add Payment Methods (Dummy View from User snippet) */}
-              <div className="rounded-lg bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
+              <div className="rounded-lg bg-white/80 backdrop-blur-md p-6 shadow-ambient transition-all duration-300 border-none hover:shadow-lg">
                 <div className="mb-6 flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="rounded bg-[#f6f3ec] p-2">
@@ -184,7 +184,7 @@ export default async function AccountPage() {
               </div>
 
               {/* Settings & Privacy (for Logout) */}
-              <div className="rounded-lg bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
+              <div className="rounded-lg bg-white/80 backdrop-blur-md p-6 shadow-ambient transition-all duration-300 border-none hover:shadow-lg">
                 <div className="mb-6 flex items-center gap-3">
                   <div className="rounded bg-[#f6f3ec] p-2">
                     <span className="material-symbols-outlined text-[#003527]">settings</span>
@@ -224,7 +224,7 @@ export default async function AccountPage() {
       </div>
 
       {/* Bottom Navigation Bar (Mobile) */}
-      <nav className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around border-t bg-[#fcf9f2] border-stone-200/30 pb-safe shadow-[0_-4px_24px_rgba(28,28,24,0.04)] md:hidden">
+      <nav className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around border-t bg-white/80 backdrop-blur-md border-stone-200/30 pb-safe shadow-[0_-4px_24px_rgba(28,28,24,0.04)] md:hidden">
         <Link href="/" className="flex flex-col items-center justify-center px-4 py-4 text-[#003527]/60 hover:bg-[#e5e2db]/30">
           <span className="material-symbols-outlined">home</span>
           <span className="mt-1 font-sans text-[10px]">الرئيسية</span>
@@ -244,7 +244,7 @@ export default async function AccountPage() {
       </nav>
 
       {/* Sidebar Navigation (Desktop) */}
-      <aside className="fixed right-0 top-0 z-[60] hidden h-full w-80 flex-col bg-[#fcf9f2] shadow-2xl lg:flex border-l border-[#e5e2db]/50">
+      <aside className="fixed right-0 top-0 z-[60] hidden h-full w-80 flex-col bg-white/80 backdrop-blur-md shadow-2xl lg:flex border-l border-[#e5e2db]/50">
         <div className="border-b border-[#e5e2db] p-8">
           <div className="flex items-center gap-4 text-right">
             <div className="h-14 w-14 overflow-hidden rounded-full border-2 border-[#735c00]">

@@ -51,12 +51,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, error: "USER_ALREADY_EXISTS" }, { status: 409 });
     }
 
+    const passwordHash = await hashPassword(data.password);
+
     const createdUser = await prisma.user.create({
       data: {
         fullName: data.fullName,
         email,
         phone,
-        passwordHash: hashPassword(data.password),
+        passwordHash,
         role: "CLIENT" as Role,
         isActive: Boolean(!email),
       },
@@ -65,10 +67,12 @@ export async function POST(request: NextRequest) {
 
     if (createdUser.email) {
       const { code } = await issueEmailVerificationCode(createdUser.email);
-      await sendVerificationEmail({
+      void sendVerificationEmail({
         to: createdUser.email,
         fullName: createdUser.fullName,
         code,
+      }).catch((error) => {
+        console.error("Verification email enqueue failed:", error);
       });
     }
 
