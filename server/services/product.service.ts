@@ -40,10 +40,17 @@ type CategoryLite = {
 const DEFAULT_PAGE_SIZE = 24;
 
 function isDbUnavailableError(error: unknown) {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    return error.code === "P1001" || error.code === "P2024";
+  }
+
   if (!(error instanceof Error)) return false;
   return (
     error.message.includes("Can't reach database server") ||
     error.message.includes("P1001") ||
+    error.message.includes("P2024") ||
+    error.message.includes("Timed out fetching a new connection from the connection pool") ||
+    error.message.includes("connection pool") ||
     error.message.includes("does not exist") ||
     error.message.includes("table")
   );

@@ -155,6 +155,16 @@ export default function CartDrawer() {
   const handleCheckout = async () => {
     if (items.length === 0 || isSubmitting) return;
 
+    if (!phone.trim()) {
+      setErrorMessage("رقم الهاتف مطلوب لإتمام الطلب.");
+      return;
+    }
+
+    if (!address.trim()) {
+      setErrorMessage("عنوان التوصيل مطلوب لإتمام الطلب.");
+      return;
+    }
+
     if (paymentMethod === "CASH") {
       if (!Number.isFinite(parsedReceived) || parsedReceived <= 0) {
         setErrorMessage("أدخل المبلغ المستلم من العميل.");
@@ -428,23 +438,25 @@ export default function CartDrawer() {
 
                 <div className="mb-4 grid gap-4 md:grid-cols-2">
                   <label className="block">
-                    <span className="mb-2 block text-sm font-bold text-on-surface">رقم الهاتف</span>
+                    <span className="mb-2 block text-sm font-bold text-on-surface">رقم الهاتف *</span>
                     <input
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       inputMode="tel"
                       placeholder="01xxxxxxxxx"
                       className="w-full rounded-xl border border-surface-container bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                      required
                     />
                   </label>
 
                   <label className="block md:col-span-2">
-                    <span className="mb-2 block text-sm font-bold text-on-surface">عنوان التوصيل</span>
+                    <span className="mb-2 block text-sm font-bold text-on-surface">عنوان التوصيل *</span>
                     <textarea
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       placeholder="المدينة، الحي، الشارع، رقم المبنى"
                       className="w-full min-h-24 rounded-xl border border-surface-container bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                      required
                     />
                   </label>
 

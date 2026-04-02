@@ -42,7 +42,10 @@ export default function CheckoutPage() {
 
   const finalTotal = Math.max(0, totals.total - promoDiscount);
 
-  const canSubmit = useMemo(() => items.length > 0 && address.trim().length >= 5 && !submitting, [items.length, address, submitting]);
+  const canSubmit = useMemo(
+    () => items.length > 0 && phone.trim().length >= 8 && address.trim().length >= 5 && !submitting,
+    [items.length, phone, address, submitting],
+  );
 
   useEffect(() => {
     setPromoDiscount(0);
@@ -85,6 +88,14 @@ export default function CheckoutPage() {
 
   const submitOrder = async () => {
     if (!canSubmit) return;
+    if (!phone.trim()) {
+      setError("رقم الهاتف مطلوب لإتمام الطلب.");
+      return;
+    }
+    if (!address.trim()) {
+      setError("عنوان التوصيل مطلوب لإتمام الطلب.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
 
@@ -199,17 +210,17 @@ export default function CheckoutPage() {
               <h2 className="mb-3 text-lg font-black text-slate-900">العنوان والتواصل</h2>
 
               <label className="mb-3 block">
-                <span className="mb-1 block text-sm font-semibold text-slate-700">رقم الهاتف (اختياري)</span>
+                <span className="mb-1 block text-sm font-semibold text-slate-700">رقم الهاتف *</span>
                 <input
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="w-full min-h-[44px] rounded-xl border border-slate-200 px-3"
-                  placeholder="05xxxxxxxx"
+                  placeholder="01xxxxxxxxx"
                 />
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-slate-700">عنوان التوصيل</span>
+                <span className="mb-1 block text-sm font-semibold text-slate-700">عنوان التوصيل *</span>
                 <textarea
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}

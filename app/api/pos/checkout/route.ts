@@ -21,6 +21,17 @@ const CheckoutSchema = z.object({
       }),
     )
     .min(1),
+}).superRefine((value, ctx) => {
+  const channel = value.channel ?? "POS";
+  if (channel !== "ONLINE") return;
+
+  if (!value.phone?.trim()) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["phone"], message: "PHONE_REQUIRED" });
+  }
+
+  if (!value.address?.trim()) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["address"], message: "ADDRESS_REQUIRED" });
+  }
 });
 
 export async function POST(request: NextRequest) {
