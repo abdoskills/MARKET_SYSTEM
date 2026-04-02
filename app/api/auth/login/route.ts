@@ -6,6 +6,10 @@ import { addAuditEvent } from "@/lib/security/audit";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 
+function isEmailIdentifier(value: string) {
+  return value.includes("@");
+}
+
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
@@ -30,12 +34,9 @@ export async function POST(request: NextRequest) {
     let role = normalizeRole(body.role);
 
     const user = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email: { equals: identifier, mode: "insensitive" } },
-          { phone: { equals: identifier } },
-        ],
-      },
+      where: isEmailIdentifier(identifier)
+        ? { email: { equals: identifier.toLowerCase(), mode: "insensitive" } }
+        : { phone: { equals: identifier } },
       select: {
         id: true,
         role: true,
