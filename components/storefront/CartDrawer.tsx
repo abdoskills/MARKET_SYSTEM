@@ -320,49 +320,96 @@ export default function CartDrawer() {
         onClick={closeCart}
       >
         <aside
-          className={`absolute left-0 top-0 h-full w-full max-w-md bg-white/80 p-5 shadow-ambient backdrop-blur-md transition-transform duration-200 ease-in-out ${
+          className={`absolute left-0 top-0 h-full w-full max-w-md bg-[#fcf9f2] p-5 shadow-[-20px_0_40px_rgba(0,0,0,0.05)] transition-transform duration-200 ease-in-out ${
             open ? "translate-x-0" : "-translate-x-full"
           }`}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-display text-2xl font-black text-on-surface">الفاتورة الحالية</h3>
-            <button type="button" onClick={closeCart} className="rounded-lg bg-surface-container-low px-3 py-1 text-sm font-semibold">
+            <h3 className="font-serif text-2xl font-black text-[#003527]">السلة الحالية</h3>
+            <span className="text-[#a08f51] font-bold text-sm bg-[#f6f3ec] px-3 py-1 rounded-full">{items.length} عناصر</span>
+            <button type="button" onClick={closeCart} className="rounded-lg bg-[#e5e2db] px-3 py-1 text-sm font-semibold text-[#003527]">
               إغلاق
             </button>
           </div>
 
-          <div className="mb-4 space-y-2">
+          <div className="mb-6 space-y-4">
             {items.length === 0 ? (
-              <p className="rounded-xl bg-surface-container-low p-3 text-sm text-secondary">لا توجد عناصر في السلة.</p>
+              <p className="rounded-xl bg-white p-6 text-center text-sm font-bold text-[#404944] shadow-sm">لا توجد عناصر في السلة.</p>
             ) : (
               items.map((item) => (
-                <div key={item.id} className="rounded-xl bg-surface-container-low p-3">
-                  <p className="text-sm font-bold text-on-surface">{item.nameAr}</p>
-                  <p className="text-xs text-secondary">
-                    {item.quantity} × {item.salePrice.toFixed(2)} ج.م
-                  </p>
+                <div key={item.id} className="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(28,28,24,0.04)]">
+                  {/* Right - Product details */}
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[#f6f3ec] flex items-center justify-center">
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.nameAr} className="h-full w-full object-cover" />
+                      ) : (
+                        <span className="material-symbols-outlined text-3xl text-[#003527]/20">inventory_2</span>
+                      )}
+                    </div>
+                    <div className="flex flex-col">
+                      <p className="text-base font-bold text-[#1c1c18] leading-tight">{item.nameAr}</p>
+                      <p className="mt-1 text-xs font-semibold text-[#404944]">
+                        {item.unit || "قطعة"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Left - Price & Quantity */}
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    <p className="text-base font-bold text-[#003527]">
+                      {item.salePrice.toFixed(2)} <span className="text-xs">ج.م</span>
+                    </p>
+                    <div className="flex items-center rounded-lg border border-[#e5e2db] bg-white h-8">
+                      <button 
+                        onClick={() => setQuantity(item.id, item.quantity + 1)}
+                        className="flex h-full w-8 items-center justify-center text-[#003527] hover:bg-[#f6f3ec] transition-colors"
+                      >
+                        +
+                      </button>
+                      <span className="flex h-full w-8 items-center justify-center border-x border-[#e5e2db] text-sm font-bold text-[#1c1c18]">
+                        {item.quantity}
+                      </span>
+                      <button 
+                        onClick={() => setQuantity(item.id, item.quantity - 1)}
+                        className="flex h-full w-8 items-center justify-center text-[#404944] hover:bg-[#f6f3ec] transition-colors"
+                      >
+                        -
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ))
             )}
           </div>
 
-          <div className="rounded-xl bg-surface-container-high p-3">
-            <p className="text-sm text-secondary">الإجمالي الفرعي</p>
-            <p className="font-display text-3xl font-black text-primary">{subtotal} ج.م</p>
+          <div className="rounded-2xl bg-white p-5 shadow-[0_4px_24px_rgba(28,28,24,0.04)] mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-sm font-bold text-[#404944]">المجموع الفرعي</p>
+              <p className="font-bold text-[#1c1c18]">{subtotal} <span className="text-xs">ج.م</span></p>
+            </div>
+            <div className="flex justify-between items-center mb-4 border-b border-[#f6f3ec] pb-4 border-dashed">
+              <p className="text-sm font-bold text-[#404944]">الضريبة (15%)</p>
+              <p className="font-bold text-[#1c1c18]">{totals.tax.toFixed(2)} <span className="text-xs">ج.م</span></p>
+            </div>
+            <div className="flex justify-between items-center">
+              <p className="font-serif text-lg font-black text-[#003527]">الإجمالي</p>
+              <p className="font-serif text-2xl font-black text-[#003527]">{totals.total.toFixed(2)} <span className="text-sm">ج.م</span></p>
+            </div>
           </div>
 
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex gap-3">
             <button
               type="button"
               onClick={handleOpenCheckout}
               disabled={items.length === 0}
-              className="flex-1 rounded-md bg-gradient-to-l from-primary to-primary-container py-2.5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex-1 rounded-xl bg-[#003527] py-4 text-base font-bold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
             >
-              الدفع الآن
+              الدفع والطباعة
             </button>
-            <button type="button" onClick={clearCart} className="rounded-md bg-surface-container-high px-4 py-2.5 text-sm font-bold text-secondary">
-              مسح
+            <button type="button" onClick={clearCart} className="rounded-xl border-2 border-[#e5e2db] bg-transparent w-20 flex items-center justify-center text-sm font-bold text-[#404944] hover:bg-[#f6f3ec]">
+              تفريغ
             </button>
           </div>
         </aside>
