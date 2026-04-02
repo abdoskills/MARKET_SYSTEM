@@ -6,7 +6,7 @@ import { getStorefrontProducts, listActiveCategories } from "@/server/services/p
 import Link from "next/link";
 import { getServerSession } from "@/lib/auth/server";
 
-export const dynamic = "force-dynamic";
+
 
 export default async function ProductsPage({
   searchParams,
