@@ -10,10 +10,13 @@ export default async function AccountPage() {
     ? await prisma.user.findUnique({
         where: { id: session.userId },
         select: {
+          fullName: true,
+          email: true,
+          role: true,
           walletBalance: true,
           walletTransactions: {
             orderBy: { createdAt: "desc" },
-            take: 8,
+            take: 3,
             select: {
               id: true,
               type: true,
@@ -28,102 +31,275 @@ export default async function AccountPage() {
     : null;
 
   const walletBalance = Number(walletProfile?.walletBalance ?? 0);
+  const fullName = walletProfile?.fullName || "مستخدم جديد";
+  const userRole = walletProfile?.role === "ADMIN" ? "مدير النظام" : "عضو ذهبي";
+  const email = walletProfile?.email || "";
 
   return (
-    <main className="min-h-screen bg-[#f7f9fb] p-4 md:p-8" dir="rtl">
-      <div className="mx-auto max-w-2xl">
-        <div className="rounded-3xl bg-white p-6 md:p-8 shadow-sm">
-          <h1 className="text-2xl font-black text-[#006c4a] mb-2">الحساب الشخصي</h1>
+    <main className="min-h-[max(884px,100dvh)] pb-24 lg:pb-0 transition-colors bg-[#fcf9f2] text-[#1c1c18] font-sans antialiased" dir="rtl">
+      {/* Top Navigation Bar */}
+      <header className="fixed top-0 z-50 w-full bg-[#fcf9f2]/80 backdrop-blur-xl dark:bg-[#002117]/80">
+        <div className="flex w-full items-center justify-between px-6 py-4">
+          <Link href="/" className="scale-102 transition-transform active:scale-95 text-[#003527] dark:text-emerald-50">
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>arrow_forward</span>
+          </Link>
+          <h1 className="font-serif text-lg tracking-wide text-[#003527] dark:text-emerald-50">حسابي</h1>
+          <div className="h-10 w-10 overflow-hidden rounded-full border border-[#735c00] p-0.5">
+            <div className="flex h-full w-full items-center justify-center rounded-full bg-[#e5e2db] text-[#003527] font-bold">
+              {fullName.charAt(0)}
+            </div>
+          </div>
+        </div>
+      </header>
 
-          {!session ? (
-            <>
-              <p className="text-slate-600 mb-6">أنت غير مسجل دخول حالياً. قم بتسجيل الدخول أو إنشاء حساب جديد.</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Link
-                  href="/login"
-                  className="min-h-[44px] rounded-xl bg-[#006c4a] text-white font-bold flex items-center justify-center"
-                >
-                  تسجيل الدخول
-                </Link>
-                <Link
-                  href="/register"
-                  className="min-h-[44px] rounded-xl bg-[#e8f3ee] text-[#006c4a] font-bold flex items-center justify-center"
-                >
-                  إنشاء حساب
-                </Link>
-                <Link
-                  href="/cart"
-                  className="min-h-[44px] rounded-xl bg-slate-100 text-slate-700 font-bold flex items-center justify-center sm:col-span-2"
-                >
-                  تعديل الكميات وإدخال العنوان
-                </Link>
-              </div>
-            </>
-          ) : (
-            <>
-              <section className="mb-4 rounded-[2.5rem] bg-primary-container p-6 text-white shadow-ambient">
-                <p className="text-sm text-white/90">المحفظة الرقمية (الفكة)</p>
-                <p className="mt-3 font-display text-4xl font-black tracking-tight">{formatEgp(walletBalance)}</p>
-                <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-amber-300/30 px-4 py-1.5 text-sm font-bold text-amber-100">
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
-                  Gold Wallet
+      {/* Main Content Canvas */}
+      <div className="mx-auto mb-16 max-w-4xl space-y-12 px-6 pt-24 text-[#1c1c18]">
+        
+        {!session ? (
+          <section className="flex flex-col items-center text-center space-y-4 py-8">
+            <h2 className="text-2xl font-serif font-bold text-[#003527]">تسجيل الدخول مطلوب</h2>
+            <p className="text-[#404944]">الرجاء تسجيل الدخول لعرض حسابك</p>
+            <div className="flex gap-4 mt-4">
+              <Link href="/login" className="px-6 py-3 bg-[#003527] text-white rounded-lg font-bold">تسجيل الدخول</Link>
+              <Link href="/register" className="px-6 py-3 bg-[#e5e2db] text-[#003527] rounded-lg font-bold">إنشاء حساب</Link>
+            </div>
+          </section>
+        ) : (
+          <>
+            {/* Hero Profile Section */}
+            <section className="flex flex-col items-center space-y-4 py-8 text-center">
+              <div className="group relative">
+                <div className="h-32 w-32 overflow-hidden rounded-full border-2 border-[#735c00] bg-white p-1 shadow-lg">
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-[#e5e2db] text-5xl font-bold text-[#003527]">
+                    {fullName.charAt(0)}
+                  </div>
                 </div>
-              </section>
+              </div>
+              <div className="space-y-1">
+                <h2 className="font-serif text-3xl font-bold text-[#003527]">{fullName}</h2>
+                <div className="flex items-center justify-center gap-2 text-[#735c00]">
+                  <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                  <span className="font-serif text-sm font-semibold tracking-wide">{userRole}</span>
+                </div>
+              </div>
 
-              <section className="mb-4 rounded-3xl bg-[#f2f8f5] p-4">
-                <h2 className="mb-3 text-lg font-black text-[#006c4a]">آخر معاملات المحفظة</h2>
+              {/* Wallet Bento Component replacing Points */}
+              <div className="mt-6 flex w-full items-center justify-between rounded-xl bg-[#f6f3ec] p-6">
+                <div className="text-right">
+                  <p className="mb-1 font-sans text-xs uppercase tracking-widest text-[#404944]">الرصيد الحالي</p>
+                  <p className="font-serif text-2xl font-bold text-[#003527]">{formatEgp(walletBalance)}</p>
+                </div>
+                <div className="flex items-center gap-3 rounded-lg bg-[#064e3b]/10 p-4">
+                  <span className="material-symbols-outlined text-3xl text-[#735c00]" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance_wallet</span>
+                  <div className="text-right">
+                    <p className="text-xs font-bold text-[#003527]">محفظة الفكة</p>
+                    <p className="text-[10px] text-[#404944]">تضاف الفكة تلقائياً هنا</p>
+                  </div>
+                </div>
+              </div>
+            </section>
 
-                {!walletProfile?.walletTransactions.length ? (
-                  <p className="rounded-2xl bg-white/70 p-3 text-sm text-slate-600">لا توجد معاملات بعد.</p>
-                ) : (
-                  <div className="space-y-2">
-                    {walletProfile.walletTransactions.map((tx) => {
+            {/* Account Grid */}
+            <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              
+              {/* Recent Transactions (Replaces My Orders) */}
+              <div className="rounded-lg bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md border-r-4 border-[#003527]">
+                <div className="mb-6 flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded bg-[#f6f3ec] p-2">
+                      <span className="material-symbols-outlined text-[#003527]">receipt_long</span>
+                    </div>
+                    <h3 className="font-serif text-lg font-bold text-[#003527]">طلباتي ومعاملاتي</h3>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {walletProfile?.walletTransactions.length === 0 ? (
+                    <p className="text-sm text-[#404944]">لا توجد معاملات سابقة.</p>
+                  ) : (
+                    walletProfile?.walletTransactions.map(tx => {
                       const isAdded = tx.type === "FAKKA_ADDED";
                       return (
-                        <div key={tx.id} className="rounded-2xl bg-white/80 p-3">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className={`text-sm font-bold ${isAdded ? "text-emerald-700" : "text-amber-700"}`}>
-                              {isAdded ? "إضافة فكة" : "صرف من المحفظة"}
+                        <div key={tx.id} className="flex items-center justify-between rounded bg-[#f6f3ec] p-3">
+                          <div>
+                            <p className="text-sm font-bold text-[#1c1c18] drop-shadow-sm">{isAdded ? "إضافة فكة من طلب" : "دفع من المحفظة"}</p>
+                            <p className="text-xs text-[#404944] mt-1">
+                              {new Intl.DateTimeFormat("ar-EG", { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(tx.createdAt))}
                             </p>
-                            <p className="font-display text-sm font-bold text-slate-800">{formatEgp(Number(tx.amount))}</p>
                           </div>
-                          <p className="mt-1 text-xs text-slate-500">{tx.note || "معاملة محفظة"}</p>
-                          <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
-                            <span>{new Date(tx.createdAt).toLocaleString("ar-EG")}</span>
-                            <span className="font-display">الرصيد: {formatEgp(Number(tx.balanceAfter))}</span>
-                          </div>
+                          <span className={`px-3 py-1 text-[11px] rounded uppercase font-bold tracking-wider ${isAdded ? 'bg-[#003527] text-white' : 'bg-[#ba1a1a] text-white'}`}>
+                            {formatEgp(Number(tx.amount))}
+                          </span>
                         </div>
                       );
-                    })}
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Saved Addresses / Information equivalent */}
+              <div className="rounded-lg bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
+                <div className="mb-6 flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded bg-[#f6f3ec] p-2">
+                      <span className="material-symbols-outlined text-[#003527]">location_on</span>
+                    </div>
+                    <h3 className="font-serif text-lg font-bold text-[#003527]">عناوين التوصيل</h3>
                   </div>
-                )}
-              </section>
-
-              <div className="rounded-2xl bg-slate-50 p-4 space-y-2">
-                <p className="text-sm text-slate-500">معرف المستخدم</p>
-                <p className="font-mono text-sm text-slate-800 break-all">{session.userId}</p>
-                <p className="text-sm text-slate-500 mt-3">الدور</p>
-                <p className="font-bold text-[#006c4a]">{session.role}</p>
+                  <Link href="/cart" className="material-symbols-outlined text-[#735c00] cursor-pointer block hover:scale-105 transition-transform">add_circle</Link>
+                </div>
+                <div className="flex gap-4 items-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#f6f3ec]">
+                    <span className="material-symbols-outlined text-[#064e3b]">home</span>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-[#1c1c18]">المنزل</p>
+                    <p className="text-xs leading-relaxed text-[#404944]">يتم اختيار العنوان أثناء إتمام الطلب من سلة التسوق</p>
+                  </div>
+                </div>
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link href="/" className="min-h-[44px] rounded-xl bg-[#e8f3ee] px-4 text-[#006c4a] font-bold flex items-center">
-                  العودة للمتجر
-                </Link>
-                <Link href="/cart" className="min-h-[44px] rounded-xl bg-slate-100 px-4 text-slate-700 font-bold flex items-center">
-                  تعديل الكميات والعنوان
-                </Link>
-                {session.role === "ADMIN" ? (
-                  <Link href="/admin/logs" className="min-h-[44px] rounded-xl bg-[#006c4a] px-4 text-white font-bold flex items-center">
-                    الذهاب للوحة التحكم
-                  </Link>
-                ) : null}
-                <LogoutButton />
+              {/* Add Payment Methods (Dummy View from User snippet) */}
+              <div className="rounded-lg bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
+                <div className="mb-6 flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded bg-[#f6f3ec] p-2">
+                      <span className="material-symbols-outlined text-[#003527]">payments</span>
+                    </div>
+                    <h3 className="font-serif text-lg font-bold text-[#003527]">طرق الدفع</h3>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between border-b border-[#bfc9c3]/10 pb-3">
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-[#735c00]">account_balance_wallet</span>
+                      <p className="text-sm text-[#1c1c18]">الدفع نقداً أو باستخدام الفكة</p>
+                    </div>
+                    <span className="rounded bg-[#fed65b]/20 px-2 py-0.5 text-[10px] font-bold text-[#735c00]">الافتراضية</span>
+                  </div>
+                  <div className="flex items-center gap-3 pt-1 cursor-not-allowed opacity-50">
+                    <span className="material-symbols-outlined text-[#404944]">add</span>
+                    <p className="text-xs font-bold text-[#404944]">إضافة بطاقة جديدة (قريباً)</p>
+                  </div>
+                </div>
               </div>
-            </>
-          )}
-        </div>
+
+              {/* Settings & Privacy (for Logout) */}
+              <div className="rounded-lg bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="rounded bg-[#f6f3ec] p-2">
+                    <span className="material-symbols-outlined text-[#003527]">settings</span>
+                  </div>
+                  <h3 className="font-serif text-lg font-bold text-[#003527]">الإعدادات والخصوصية</h3>
+                </div>
+                <ul className="space-y-4">
+                  {session.role === "ADMIN" && (
+                    <li className="flex cursor-pointer items-center justify-between text-[#404944] transition-colors hover:text-[#003527]">
+                      <Link href="/admin/logs" className="flex items-center justify-between w-full">
+                        <span className="text-sm font-bold text-[#003527]">لوحة تحكم المشرف</span>
+                        <span className="material-symbols-outlined text-sm">chevron_left</span>
+                      </Link>
+                    </li>
+                  )}
+                  <li className="flex cursor-pointer items-center justify-between text-[#404944] transition-colors hover:text-[#003527]">
+                    <span className="text-sm">تفضيلات الإشعارات</span>
+                    <span className="material-symbols-outlined text-sm">chevron_left</span>
+                  </li>
+                  <li className="flex cursor-pointer items-center justify-between text-[#404944] transition-colors hover:text-[#003527]">
+                    <span className="text-sm">سياسة الخصوصية</span>
+                    <span className="material-symbols-outlined text-sm">chevron_left</span>
+                  </li>
+                  <li className="flex items-center justify-between pt-2">
+                    <LogoutButton className="flex cursor-pointer items-center justify-between w-full text-error hover:opacity-80 transition-opacity bg-transparent p-0 m-0 outline-none text-[#ba1a1a]">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>logout</span>
+                        <span className="text-sm font-bold">تسجيل الخروج</span>
+                      </div>
+                    </LogoutButton>
+                  </li>
+                </ul>
+              </div>
+            </section>
+          </>
+        )}
       </div>
+
+      {/* Bottom Navigation Bar (Mobile) */}
+      <nav className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around border-t bg-[#fcf9f2] border-stone-200/30 pb-safe shadow-[0_-4px_24px_rgba(28,28,24,0.04)] md:hidden">
+        <Link href="/" className="flex flex-col items-center justify-center px-4 py-4 text-[#003527]/60 hover:bg-[#e5e2db]/30">
+          <span className="material-symbols-outlined">home</span>
+          <span className="mt-1 font-sans text-[10px]">الرئيسية</span>
+        </Link>
+        <Link href="/cart" className="flex flex-col items-center justify-center px-4 py-4 text-[#003527]/60 hover:bg-[#e5e2db]/30">
+          <span className="material-symbols-outlined">local_mall</span>
+          <span className="mt-1 font-sans text-[10px]">المتجر</span>
+        </Link>
+        <Link href="/orders" className="flex flex-col items-center justify-center px-4 py-4 text-[#003527]/60 hover:bg-[#e5e2db]/30">
+          <span className="material-symbols-outlined">receipt_long</span>
+          <span className="mt-1 font-sans text-[10px]">الطلبات</span>
+        </Link>
+        <Link href="/account" className="flex flex-col items-center justify-center px-4 py-4 font-bold text-[#735c00] duration-200 scale-110">
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
+          <span className="mt-1 font-sans text-[10px]">حسابي</span>
+        </Link>
+      </nav>
+
+      {/* Sidebar Navigation (Desktop) */}
+      <aside className="fixed right-0 top-0 z-[60] hidden h-full w-80 flex-col bg-[#fcf9f2] shadow-2xl lg:flex border-l border-[#e5e2db]/50">
+        <div className="border-b border-[#e5e2db] p-8">
+          <div className="flex items-center gap-4 text-right">
+            <div className="h-14 w-14 overflow-hidden rounded-full border-2 border-[#735c00]">
+              <div className="flex h-full w-full items-center justify-center bg-[#f6f3ec] text-[#003527] font-bold text-xl">
+                {fullName.charAt(0)}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-serif text-lg font-black text-[#003527]">{fullName}</h4>
+              <p className="text-xs font-bold text-[#735c00]">{userRole}</p>
+              <p className="mt-1 text-[10px] text-[#404944]">{email}</p>
+            </div>
+          </div>
+        </div>
+        <nav className="flex-1 overflow-y-auto py-8">
+          <ul className="space-y-1">
+            <li>
+              <Link href="/" className="flex items-center gap-4 px-8 py-4 text-[#003527]/80 transition-all duration-300 hover:bg-[#e5e2db]/30">
+                <span className="material-symbols-outlined">home</span>
+                <span className="font-serif text-sm">الرئيسية للمتجر</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/cart" className="flex items-center gap-4 px-8 py-4 text-[#003527]/80 transition-all duration-300 hover:bg-[#e5e2db]/30">
+                <span className="material-symbols-outlined">local_mall</span>
+                <span className="font-serif text-sm">التسوق والسلة</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/orders" className="flex items-center gap-4 px-8 py-4 text-[#003527]/80 transition-all duration-300 hover:bg-[#e5e2db]/30">
+                <span className="material-symbols-outlined">receipt_long</span>
+                <span className="font-serif text-sm">طلباتي</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/account" className="flex items-center gap-4 border-r-4 border-[#735c00] bg-[#064e3b]/5 px-8 py-4 text-[#735c00] transition-all duration-300">
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
+                <span className="font-serif font-bold text-sm">حسابي</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="#" className="flex items-center gap-4 px-8 py-4 text-[#003527]/80 transition-all duration-300 hover:bg-[#e5e2db]/30">
+                <span className="material-symbols-outlined">help_outline</span>
+                <span className="font-serif text-sm">المساعدة</span>
+              </Link>
+            </li>
+          </ul>
+        </nav>
+        <div className="p-8">
+          <LogoutButton className="flex w-full items-center justify-center gap-2 rounded bg-[#003527] py-4 text-sm font-bold text-white transition-colors hover:bg-[#064e3b]">
+            <span className="material-symbols-outlined">logout</span>
+            تسجيل الخروج
+          </LogoutButton>
+        </div>
+      </aside>
     </main>
   );
 }

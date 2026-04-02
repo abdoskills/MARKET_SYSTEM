@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 
-export default function LogoutButton() {
+interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+
+export default function LogoutButton({ className, children, ...props }: Props) {
   const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
@@ -23,9 +25,10 @@ export default function LogoutButton() {
       type="button"
       onClick={handleLogout}
       disabled={loading}
-      className="min-h-[44px] rounded-xl bg-red-600 px-4 text-white font-bold disabled:opacity-60"
+      className={className || "min-h-[44px] rounded-xl bg-red-600 px-4 text-white font-bold disabled:opacity-60"}
+      {...props}
     >
-      {loading ? "..." : "تسجيل الخروج"}
+      {loading ? "..." : children || "تسجيل الخروج"}
     </button>
   );
 }
