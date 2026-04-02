@@ -1,5 +1,4 @@
 "use client";
-import { useState, useEffect } from "react";
 
 import { useCartStore } from "@/lib/store/cartStore";
 import { useUIStore } from "@/lib/store/uiStore";

@@ -29,12 +29,10 @@ type PromoValidateResponse =
 
 export default function CheckoutPage() {
   const items = useCartStore((state) => state.items);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
   const totals = useCartStore((state) => state.totals);
   const setQuantity = useCartStore((state) => state.setQuantity);
   const clearCart = useCartStore((state) => state.clearCart);
+  const [mounted, setMounted] = useState(false);
 
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -87,6 +85,8 @@ export default function CheckoutPage() {
     setIsPosMode(posMode);
     setPaymentMethod(posMode ? "CASH" : "CARD");
   }, []);
+
+  useEffect(() => setMounted(true), []);
 
   const applyPromoCode = async () => {
     if (!promoCode.trim()) {
@@ -213,6 +213,8 @@ export default function CheckoutPage() {
     win.focus();
     win.print();
   };
+
+  if (!mounted) return null;
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-emerald-50 via-slate-50 to-white p-4 md:p-8" dir="rtl">

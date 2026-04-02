@@ -48,13 +48,11 @@ export default function CartDrawer() {
   const open = useUIStore((state) => state.isCartOpen);
   const closeCart = useUIStore((state) => state.closeCart);
   const items = useCartStore((state) => state.items);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
   const totals = useCartStore((state) => state.totals);
   const clearCart = useCartStore((state) => state.clearCart);
   const replaceCart = useCartStore((state) => state.replaceCart);
   const setQuantity = useCartStore((state) => state.setQuantity);
+  const [mounted, setMounted] = useState(false);
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [phone, setPhone] = useState("");
@@ -76,6 +74,8 @@ export default function CartDrawer() {
   const parsedReceived = Number(receivedAmount || 0);
   const changeDue = Math.max(0, parsedReceived - finalTotal);
   const remainingDue = Math.max(0, finalTotal - parsedReceived);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     document.body.style.overflow = open || isCheckoutOpen ? "hidden" : "";
@@ -313,6 +313,8 @@ export default function CartDrawer() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
+
+  if (!mounted) return null;
 
   return (
     <>

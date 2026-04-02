@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ShoppingCart, Plus, Search, Trash2 } from "lucide-react";
 import CartDrawer from "./CartDrawer";
@@ -21,13 +21,14 @@ type PosTerminalProps = {
 export default function PosTerminal({ products = [] }: PosTerminalProps) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
   const cartItems = useCartStore((state) => state.items);
   const totals = useCartStore((state) => state.totals);
   const removeItem = useCartStore((state) => state.removeItem);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const displayProducts = products;
+
+  if (!mounted) return null;
   
   return (
     <div className="flex h-screen bg-gray-100" dir="rtl">
