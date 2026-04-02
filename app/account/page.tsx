@@ -12,6 +12,7 @@ export default async function AccountPage() {
         select: {
           fullName: true,
           email: true,
+          phone: true,
           role: true,
           walletBalance: true,
           walletTransactions: {
@@ -29,6 +30,29 @@ export default async function AccountPage() {
         },
       })
     : null;
+
+  const recentOrders = session
+    ? await prisma.order.findMany({
+        where: {
+          OR: [
+            { createdByUserId: session.userId },
+            ...(walletProfile?.phone
+              ? [{ customer: { phone: { equals: walletProfile.phone } } }]
+              : []),
+          ],
+        },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: {
+          id: true,
+          orderNumber: true,
+          status: true,
+          totalAmount: true,
+          paymentMethod: true,
+          createdAt: true,
+        },
+      })
+    : [];
 
   const walletBalance = Number(walletProfile?.walletBalance ?? 0);
   const fullName = walletProfile?.fullName || "مستخدم جديد";
@@ -113,26 +137,49 @@ export default async function AccountPage() {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  {walletProfile?.walletTransactions.length === 0 ? (
-                    <p className="text-sm text-[#404944]">لا توجد معاملات سابقة.</p>
+                  {recentOrders.length === 0 ? (
+                    <p className="text-sm text-[#404944]">لا توجد طلبات سابقة.</p>
                   ) : (
-                    walletProfile?.walletTransactions.map(tx => {
-                      const isAdded = tx.type === "FAKKA_ADDED";
-                      return (
-                        <div key={tx.id} className="flex items-center justify-between rounded bg-[#f6f3ec] p-3">
-                          <div>
-                            <p className="text-sm font-bold text-[#1c1c18] drop-shadow-sm">{isAdded ? "إضافة فكة من طلب" : "دفع من المحفظة"}</p>
-                            <p className="text-xs text-[#404944] mt-1">
-                              {new Intl.DateTimeFormat("ar-EG", { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(tx.createdAt))}
-                            </p>
-                          </div>
-                          <span className={`px-3 py-1 text-[11px] rounded uppercase font-bold tracking-wider ${isAdded ? 'bg-[#003527] text-white' : 'bg-[#ba1a1a] text-white'}`}>
-                            {formatEgp(Number(tx.amount))}
-                          </span>
+                    recentOrders.map((order) => (
+                      <div key={order.id} className="flex items-center justify-between rounded bg-[#f6f3ec] p-3">
+                        <div>
+                          <p className="text-sm font-bold text-[#1c1c18] drop-shadow-sm">{order.orderNumber}</p>
+                          <p className="text-xs text-[#404944] mt-1">
+                            {new Intl.DateTimeFormat("ar-EG", { year: "numeric", month: "long", day: "numeric" }).format(new Date(order.createdAt))}
+                            {" • "}
+                            {order.status === "COMPLETED" ? "مكتمل" : order.status === "PENDING" ? "قيد المعالجة" : "تم التحديث"}
+                          </p>
                         </div>
-                      );
-                    })
+                        <span className="px-3 py-1 text-[11px] rounded uppercase font-bold tracking-wider bg-[#003527] text-white">
+                          {formatEgp(Number(order.totalAmount))}
+                        </span>
+                      </div>
+                    ))
                   )}
+
+                  <div className="pt-2 border-t border-[#e5e2db]">
+                    <p className="text-xs font-bold text-[#404944] mb-3">آخر معاملات المحفظة</p>
+                    {walletProfile?.walletTransactions.length === 0 ? (
+                      <p className="text-sm text-[#404944]">لا توجد معاملات محفظة سابقة.</p>
+                    ) : (
+                      walletProfile?.walletTransactions.map(tx => {
+                        const isAdded = tx.type === "FAKKA_ADDED";
+                        return (
+                          <div key={tx.id} className="flex items-center justify-between rounded bg-[#f6f3ec] p-3 mb-2">
+                            <div>
+                              <p className="text-sm font-bold text-[#1c1c18] drop-shadow-sm">{isAdded ? "إضافة فكة من طلب" : "دفع من المحفظة"}</p>
+                              <p className="text-xs text-[#404944] mt-1">
+                                {new Intl.DateTimeFormat("ar-EG", { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(tx.createdAt))}
+                              </p>
+                            </div>
+                            <span className={`px-3 py-1 text-[11px] rounded uppercase font-bold tracking-wider ${isAdded ? 'bg-[#003527] text-white' : 'bg-[#ba1a1a] text-white'}`}>
+                              {formatEgp(Number(tx.amount))}
+                            </span>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
               </div>
 

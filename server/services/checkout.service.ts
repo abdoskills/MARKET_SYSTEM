@@ -322,6 +322,7 @@ export async function executeCheckout(input: CheckoutInput): Promise<CheckoutSer
         channel,
         status: initialStatus,
         customerId,
+        createdByUserId: walletUserId,
         notes: address ? `DELIVERY_ADDRESS: ${address}` : null,
         subtotal,
         discountType: discountAmount > 0 ? "FIXED" : null,
