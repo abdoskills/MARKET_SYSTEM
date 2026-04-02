@@ -48,6 +48,9 @@ export default function CartDrawer() {
   const open = useUIStore((state) => state.isCartOpen);
   const closeCart = useUIStore((state) => state.closeCart);
   const items = useCartStore((state) => state.items);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
   const totals = useCartStore((state) => state.totals);
   const clearCart = useCartStore((state) => state.clearCart);
   const replaceCart = useCartStore((state) => state.replaceCart);

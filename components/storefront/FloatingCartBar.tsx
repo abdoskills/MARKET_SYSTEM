@@ -1,10 +1,14 @@
 "use client";
 
 import { useCartStore } from "@/lib/store/cartStore";
+import { useEffect, useState } from "react";
 import { useUIStore } from "@/lib/store/uiStore";
 
 export default function FloatingCartBar() {
   const count = useCartStore((state) => state.totals.itemsCount);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
   const openCart = useUIStore((state) => state.openCart);
 
   if (count === 0) return null;

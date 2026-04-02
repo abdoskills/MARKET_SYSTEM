@@ -29,6 +29,9 @@ type PromoValidateResponse =
 
 export default function CheckoutPage() {
   const items = useCartStore((state) => state.items);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
   const totals = useCartStore((state) => state.totals);
   const setQuantity = useCartStore((state) => state.setQuantity);
   const clearCart = useCartStore((state) => state.clearCart);

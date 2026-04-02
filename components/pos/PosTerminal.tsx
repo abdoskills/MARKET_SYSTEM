@@ -21,6 +21,9 @@ type PosTerminalProps = {
 export default function PosTerminal({ products = [] }: PosTerminalProps) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
   const cartItems = useCartStore((state) => state.items);
   const totals = useCartStore((state) => state.totals);
   const removeItem = useCartStore((state) => state.removeItem);
